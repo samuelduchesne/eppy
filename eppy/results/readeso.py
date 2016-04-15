@@ -19,7 +19,7 @@ from eppy.modeleditor import IDF
 
 from esoreader import EsoFile
 
-from results import eso_data
+from eppy.results import eso_data
 
 
 iddfhandle = StringIO(iddcurrent.iddtxt)

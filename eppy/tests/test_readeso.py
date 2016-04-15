@@ -18,7 +18,7 @@ from eppy.modeleditor import IDF
 
 from eppy.results.readeso import EsoFile
 
-from results import eso_data
+from eppy.results import eso_data
 
 
 esohandle = StringIO(eso_data.test_results)
