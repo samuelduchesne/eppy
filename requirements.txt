@@ -5,3 +5,4 @@ pyparsing==1.5.7
 pytest>=2.3.5
 tinynumpy>=1.2.1
 esoreader>=1.2.1
+pandas>=0.18
