@@ -835,7 +835,17 @@ class IDF5(IDF4):
 
         """
         self.save(filename, lineendings, encoding)
-
+    
+    def set_results(self, results=None):
+        """Assign results to the IDF.
+        
+        Parameters
+        ----------
+        results : EsoFile, optional
+            An EsoFile object from esoreader. Default: None.
+        
+        """
+        self.results = results
 
 IDF = IDF5
 
