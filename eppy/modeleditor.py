@@ -746,6 +746,7 @@ class IDF5(IDF4):
 
     def __init__(self, idfname=None):
         super(IDF5, self).__init__(idfname)
+        self.set_results()
 
     def save(self, filename=None, lineendings='default', encoding='latin-1'):
         """ 
