@@ -26,11 +26,12 @@ esoresults = EsoFile(esohandle)
 
 
 def test_no_results():
-    """Test that idf.results responds with None if no results.
+    """Test that idf.results is not set if no results have been set.
     """
     idf = IDF()
     
-    assert idf.results is None
+    if hasattr(idf, 'results'):
+        assert False
 
 
 def test_some_results():
