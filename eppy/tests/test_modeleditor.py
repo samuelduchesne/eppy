@@ -751,3 +751,20 @@ def test_idfstr():
     assert "\n" not in s  # has no line breaks
     assert "\n\n" not in s  # has no empty lines
     assert s != original  # is changed
+
+def test_reversefields():
+    """py.test for reversefields"""
+    idf = IDF()
+    idf.initreadtxt(idfsnippet)
+    constructions = idf.idfobjects['Construction'.upper()]
+    c0 = constructions[0]
+    result = modeleditor.reversefields(idf, c0, '_reverse')
+    expected = ['Construction',
+                'Interior Floor_reverse',
+                'M11 100mm lightweight concrete',
+                'F05 Ceiling air space resistance',
+                'F16 Acoustic tile',
+            ]
+    assert result.obj == expected
+                    
+                    

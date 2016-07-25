@@ -139,5 +139,12 @@ ZoneHVAC:EquipmentConnections,
     AnExhaustNode,              !- Zone Air Exhaust Node or NodeList Name
     AZoneAirNode,               !- Zone Air Node Name
     AZoneReturnAirNode;         !- Zone Return Air Node Name
+
+
+Construction,
+    Interior Floor,          !- Name
+    F16 Acoustic tile,       !- Outside Layer
+    F05 Ceiling air space resistance,  !- Layer 2
+    M11 100mm lightweight concrete;  !- Layer 3
 """
 

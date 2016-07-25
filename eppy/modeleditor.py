@@ -837,6 +837,21 @@ class IDF5(IDF4):
         self.save(filename, lineendings, encoding)
 
 
+def reversefields(idf, idfobj, name_suffix=None):
+    """reverse the fields. used to reverse a construction"""
+    if name_suffix == None:
+        name_suffix = '_reverse'
+    idf.copyidfobject(idfobj)
+    newobj = idf.idfobjects[idfobj.key.upper()][-1]
+    oldname = idfobj.Name
+    newobj.Name = oldname + name_suffix
+    objlist = newobj.obj
+    listend = [i for i in objlist[2:]]
+    listend.reverse()
+    newobj.obj = objlist[:2] + listend
+    return newobj
+    
+
 IDF = IDF5
 
 
@@ -847,3 +862,4 @@ class something(IDF0):
     def __init__(self, arg):
         super(something, self).__init__()
         self.arg = arg
+
