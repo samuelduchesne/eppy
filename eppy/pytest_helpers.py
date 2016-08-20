@@ -5,17 +5,17 @@
 # taken from python's unit test
 # may be covered by Python's license
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
-def almostequal(first, second, places=7, printit=True):
+def almostequal(first, second, places=7):
     """docstring for almostequal"""
+    # convert to float first
+    try:
+        first = float(first)
+        second = float(second)
+    except ValueError:
+        # handle non-float types
+        return str(first) == str(second)
+    # test floats for near-equality
     if round(abs(second-first), places) != 0:
-        if printit:
-            print(round(abs(second-first), places))
-            print("notalmost: %s != %s" % (first, second))
         return False
     else:
         return True
