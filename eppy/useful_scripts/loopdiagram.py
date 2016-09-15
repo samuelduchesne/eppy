@@ -37,24 +37,15 @@ sys.path.append(pathnameto_eplusscripting)
 
 
 def firstisnode(edge):
-    if type(edge[0]) == tuple:
-        return True
-    else:
-        return False
+    return type(edge[0]) == tuple
 
 
 def secondisnode(edge):
-    if type(edge[1]) == tuple:
-        return True
-    else:
-        return False
+    return type(edge[1]) == tuple
 
 
 def bothnodes(edge):
-    if type(edge[0]) == tuple and type(edge[1]) == tuple:
-        return True
-    else:
-        return False
+    return firstisnode(edge) and secondisnode(edge)
     
     
 def dropnodes(edges):
