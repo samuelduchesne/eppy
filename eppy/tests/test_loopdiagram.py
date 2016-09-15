@@ -6,6 +6,7 @@
 #  http://opensource.org/licenses/MIT)
 # =======================================================================
 """py.test for loopdiagram.py"""
+#from eppy.useful_scripts.loopdiagram import dropnodes
 
 from __future__ import absolute_import
 from __future__ import division
@@ -18,11 +19,12 @@ from eppy.pytest_helpers import do_integration_tests
 import pytest
 
 from eppy.useful_scripts.loopdiagram import clean_edges
-from eppy.useful_scripts.loopdiagram import dropnodes
 from eppy.useful_scripts.loopdiagram import edges2nodes
 from eppy.useful_scripts.loopdiagram import getedges
 from eppy.useful_scripts.loopdiagram import process_idf
 from eppy.useful_scripts.loopdiagram import replace_colon
+from eppy.useful_scripts.loopdiagram import save_diagram
+#from eppy.useful_scripts.loopdiagram import LoopDiagram
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,41 +34,6 @@ RESOURCES_DIR = os.path.join(THIS_DIR, os.pardir, 'resources')
 IDD_FILES = os.path.join(RESOURCES_DIR, 'iddfiles')
 IDF_FILES = os.path.join(RESOURCES_DIR, 'idffiles')
 
-def test_dropnodes():
-    """py.test for dropnodes"""
-    # test 1
-    node = "node"
-    (a,b,c,d,e,f,g,h,i) = (('a', node),'b',('c', node),'d',
-        ('e', node),'f',('g', node),'h',('i', node))
-    edges = [(a, b),
-    (b, c),
-    (c, d),
-    (d, e),
-    (e, f),
-    (f, g),
-    (g, h),
-    (h, i),]
-    theresult = [('a', 'b'), ('b', 'd'), ('d', 'f'), ('f', 'h'), ('h', 'i')]
-    result = dropnodes(edges)
-    assert result == theresult
-    # test 2
-    (a,b,c,d,e,f,g,h,i,j) = (('a', node),'b',('c', node),
-        ('d', node),'e','f',('g', node),('h', node),'i',('j', node))
-    edges = [(a, b),
-    (b, c),
-    (c, e),
-    (e, g),
-    (g, i),
-    (i, j),
-    (b, d),
-    (d, f),
-    (f, h),
-    (h, i),]
-    theresult = [('a', 'b'), ('b', 'e'), ('e', 'i'), ('i', 'j'), 
-            ('b', 'f'), ('f', 'i')]
-    result = dropnodes(edges)
-    assert result == theresult
-    
 
 def test_edges2nodes():
     """py.test for edges2nodes"""
@@ -98,17 +65,33 @@ def test_cleanedges():
         assert result == clean_edg
         
 
-@pytest.mark.skipif(
-    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
-def test_loopdiagram_integration():
+#@pytest.mark.skipif(
+#    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
+def test_loopdiagram_simple_integration():
     """End-to-end smoke test on an example file"""
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")
-    process_idf(fname, idd)
+    g = process_idf(fname, idd)
+    save_diagram(fname, g)
 
+def test_newloopdiagram_simple_integration():
+    """End-to-end smoke test on an example file"""
+    idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
+    fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")
+#    diagram = LoopDiagram(fname, idd)
+#    diagram.save()
 
-@pytest.mark.skipif(
-    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
+#@pytest.mark.skipif(
+#    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
+def test_loopdiagram_airloop_integration():
+    """End-to-end smoke test on an example file"""
+    idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
+    fname = os.path.join(IDF_FILES, "V8_1_0/5ZoneAutoDXVAV.idf")
+    g = process_idf(fname, idd)
+    save_diagram(fname, g)
+
+#@pytest.mark.skipif(
+#    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
 def test_getedges():
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")

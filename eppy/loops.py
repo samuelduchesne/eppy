@@ -73,7 +73,12 @@ def plantloopfieldlists(data):
         'Demand Side Branch List Name']] * numobjects
 
 def plantloopfields(data, commdct):
-    """get plantloop fields to diagram it"""
+    """Get plantloop fields to diagram it
+ 
+    - demand inlet, outlet, branchlist
+    - supply inlet, outlet, branchlist
+    
+    """
     fieldlists = plantloopfieldlists(data)
     objkey = 'plantloop'.upper()
     return extractfields(data, commdct, objkey, fieldlists)
@@ -102,7 +107,8 @@ def branch_inlet_outlet(data, commdct, branchname):
     return [theobject[inletindex], theobject[outletindex]]
 
 def splittermixerfieldlists(data, commdct, objkey):
-    """docstring for splittermixerfieldlists"""
+    """docstring for splittermixerfieldlists
+    """
     objkey = objkey.upper()
     objindex = data.dtls.index(objkey)
     objcomms = commdct[objindex]
@@ -114,13 +120,25 @@ def splittermixerfieldlists(data, commdct, objkey):
     return fieldlists
 
 def splitterfields(data, commdct):
-    """get splitter fields to diagram it"""
+    """get splitter fields to diagram it
+
+    - inlet
+    - outlet1
+    - outlet2
+    
+    """
     objkey = "Connector:Splitter".upper()
     fieldlists = splittermixerfieldlists(data, commdct, objkey)
     return extractfields(data, commdct, objkey, fieldlists)
 
 def mixerfields(data, commdct):
-    """get mixer fields to diagram it"""
+    """get mixer fields to diagram it
+    
+    - outlet
+    - inlet1
+    - inlet2
+
+    """
     objkey = "Connector:Mixer".upper()
     fieldlists = splittermixerfieldlists(data, commdct, objkey)
     return extractfields(data, commdct, objkey, fieldlists)
