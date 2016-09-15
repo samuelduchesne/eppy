@@ -37,67 +37,9 @@ except ImportError:
 
 sys.path.append(PATH_TO_EPPY)
 
-class LoopDiagram(object):
-    
-    def __init__(self, fname, iddfile):
-        self.fname = fname
-        data, commdct, _ = readidf.readdatacommdct(fname, iddfile=iddfile)
-        self.data = data
-        self.commdct = commdct      
-    
-    def make_diagram(self):
-        """Create a plant and air loop diagram.
-        """
-        print("constructing the loops")
-        edges = makeairplantloop(self.data, self.commdct)
-        print("cleaning edges")
-        edges = clean_edges(edges)
-        print("making the diagram")
-    
-        self.diagram = makediagram(edges)
-    
-    def save(self):
-        dotname = '%s.dot' % (os.path.splitext(self.fname)[0])
-        pngname = '%s.png' % (os.path.splitext(self.fname)[0])
-        self.diagram.write(dotname)
-        print("saved file: %s" % (dotname))
-        self.diagram.write_png(pngname)
-        print("saved file: %s" % (pngname))
-
-def make_and_save_diagram(fname, iddfile):
-    """Create a plant and air loop diagram and save to a PNG and a DOT file.
-    """
-    g = process_idf(fname, iddfile)
-    save_diagram(fname, g)
-
-
-def process_idf(fname, iddfile):
-    """Create a plant and air loop diagram.
-    """
-    data, commdct, _iddindex = readidf.readdatacommdct(fname, iddfile=iddfile)
-    print("constructing the loops")
-    edges = makeairplantloop(data, commdct)
-    print("cleaning edges")
-    edges = clean_edges(edges)
-    print("making the diagram")
-
-    return makediagram(edges)
-
-    
-def save_diagram(fname, g):
-    """Save a plant and air loop diagram to a PNG and a DOT file.
-    """
-    dotname = '%s.dot' % (os.path.splitext(fname)[0])
-    pngname = '%s.png' % (os.path.splitext(fname)[0])
-    g.write(dotname)
-    print("saved file: %s" % (dotname))
-    g.write_png(pngname)
-    print("saved file: %s" % (pngname))
-
 
 def makeairplantloop(data, commdct):
-    """Get a list of edges representing air loops and plant loops.
-    """
+    """Make the edges for the airloop and the plantloop"""
     edges = []
     edges.extend(plantloop_edges(data, commdct))
     edges.extend(airloop_edges(data, commdct))
@@ -106,21 +48,24 @@ def makeairplantloop(data, commdct):
 
 
 def plantloop_edges(data, commdct):
-    """Get a list of edges representing plant loops.
+    """Create the edges representing the plant loops.
     """
     anode = "epnode"
-    # start with the components of the branch
-    edges = component_edges(data, commdct, anode)
-    # then make the connections to splitters and mixers
+
     branch_connections = get_branch_connectors(data, commdct)
+
+    # start with the components of the branch
+    edges = component_edges(data, commdct)
+    
     # connect splitters to nodes
     splitters = loops.splitterfields(data, commdct)
-    edges.extend(splitter_edges(splitter, branch_connections, anode)
-                 for splitter in splitters)    
+    for splitter in splitters:
+        edges.extend(splitter_edges(splitter, branch_connections, anode))
+    
     # connect mixers to nodes
     mixers = loops.mixerfields(data, commdct)
-    edges.extend(mixer_edges(mixer, branch_connections, anode)
-                 for mixer in mixers)
+    for mixer in mixers:
+        edges.extend(mixer_edges(mixer, branch_connections, anode))
     
     return edges
 
@@ -137,9 +82,8 @@ def get_branch_connectors(data, commdct):
     return connectors
 
 
-def component_edges(data, commdct, anode):
-    """Return the edges joining the components of a branch.
-    """
+def component_edges(data, commdct, anode="epnode"):
+    """return the edges joining the components of a branch"""
     alledges = []
 
     cnamefield = "Component %s Name"
@@ -365,7 +309,6 @@ def hvac_allairdistcomponents(data, commdct):
     return alladistu_comps
 
 
-
 def airloop_edges(data, commdct):
     # -----------air loop stuff----------------------
 
@@ -493,7 +436,17 @@ def nodetype(anode):
 
 
 def transpose2d(mtx):
-    """Transpose a 2d matrix.
+    """Transpose a 2d matrix
+       [
+            [1,2,3],
+            [4,5,6]
+            ]
+        becomes
+        [
+            [1,4],
+            [2,5],
+            [3,6]
+            ]
     """
     return zip(*mtx)
 
@@ -519,6 +472,31 @@ def clean_edges(arg):
         return replace_colon(arg) # not a sequence so just return repr
 
     
+def make_and_save_diagram(fname, iddfile):
+    g = process_idf(fname, iddfile)
+    save_diagram(fname, g)
+
+
+def process_idf(fname, iddfile):
+    data, commdct, _iddindex = readidf.readdatacommdct(fname, iddfile=iddfile)
+    print("constructing the loops")
+    edges = makeairplantloop(data, commdct)
+    print("cleaning edges")
+    edges = clean_edges(edges)
+    print("making the diagram")
+
+    return makediagram(edges)
+
+    
+def save_diagram(fname, g):
+    dotname = '%s.dot' % (os.path.splitext(fname)[0])
+    pngname = '%s.png' % (os.path.splitext(fname)[0])
+    g.write(dotname)
+    print("saved file: %s" % (dotname))
+    g.write_png(pngname)
+    print("saved file: %s" % (pngname))
+
+
 def main():
     parser = argparse.ArgumentParser(usage=None, 
                 description=__doc__, 
