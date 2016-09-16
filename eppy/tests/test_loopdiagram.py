@@ -6,9 +6,6 @@
 #  http://opensource.org/licenses/MIT)
 # =======================================================================
 """py.test for loopdiagram.py"""
-#from eppy.useful_scripts.loopdiagram import dropnodes
-#from eppy.useful_scripts.loopdiagram import process_idf
-#from eppy.useful_scripts.loopdiagram import save_diagram
 
 from __future__ import absolute_import
 from __future__ import division
@@ -17,7 +14,6 @@ from __future__ import unicode_literals
 
 import os
 
-from eppy.modeleditor import IDF
 from eppy.pytest_helpers import do_integration_tests
 import pytest
 
@@ -66,8 +62,8 @@ def test_cleanedges():
         assert result == clean_edge
         
 
-#@pytest.mark.skipif(
-#    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
+@pytest.mark.skipif(
+    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
 def test_loopdiagram_simple_integration():
     """End-to-end smoke test on an example file"""
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
@@ -76,8 +72,8 @@ def test_loopdiagram_simple_integration():
     diagram.save()
 
 
-#@pytest.mark.skipif(
-#    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
+@pytest.mark.skipif(
+    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
 def test_loopdiagram_airloop_integration():
     """End-to-end smoke test on an example file"""
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
@@ -86,8 +82,8 @@ def test_loopdiagram_airloop_integration():
     diagram.save()
 
 
-#@pytest.mark.skipif(
-#    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
+@pytest.mark.skipif(
+    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
 def test_getedges():
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")

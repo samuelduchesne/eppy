@@ -234,7 +234,6 @@ class AirLoop(object):
         # connect supplyplenum to nodes
         supplyplenums = loops.supplyplenumfields(self.data, self.commdct)
         for supplyplenum in supplyplenums:
-            # TODO: unit test
             edges.extend(self.supplyplenum_edges(supplyplenum))
         
         # connect zonesplitter to nodes
@@ -245,7 +244,6 @@ class AirLoop(object):
         # connect zonemixer to nodes
         zonemixers = loops.zonemixerfields(self.data, self.commdct)
         for zonemixer in zonemixers:
-            # TODO: unit test
             edges.extend(self.zonemixer_edges(zonemixer))
         
         # connect returnplenums to nodes
@@ -278,7 +276,6 @@ class AirLoop(object):
         # airinlet -> adistu_component
         allairdist_comps = loops.allairdistcomponentfields(self.data, self.commdct)
         for airdist_comps in allairdist_comps:
-            # TODO: unit test
             for airdist_comp in airdist_comps:
                 name = airdist_comp[0]
                 for airnode in airdist_comp[1:]:
@@ -303,7 +300,6 @@ class AirLoop(object):
         return edges
     
     def supplyplenum_edges(self, supplyplenum):
-        # TODO: Unit test
         name = supplyplenum[0]
         inlet = supplyplenum[3]
         outlets = supplyplenum[4:]
@@ -313,7 +309,6 @@ class AirLoop(object):
         return edges
     
     def zonemixer_edges(self, zonemixer):
-        # TODO: Unit test
         name = zonemixer[0]
         outlet = zonemixer[1]
         inlets = zonemixer[2:]
