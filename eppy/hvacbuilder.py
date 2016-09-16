@@ -134,6 +134,8 @@ def getbranchcomponents(idf, branch, utest=False):
             objname = branch[fobjname % (i, )]
             complist.append((objtype, objname))
         except bunch_subclass.BadEPFieldError:
+            # TODO: unit test
+            # When should this be triggered?
             break
     if utest:
         return complist
@@ -174,6 +176,7 @@ def getfieldnamesendswith(idfobject, endswith):
     objls = idfobject.objls
     tmp = [name for name in objls if name.endswith(endswith)]
     if tmp == []:
+        # TODO: unit test
         pass
     return [name for name in objls if name.endswith(endswith)]
 
@@ -186,6 +189,7 @@ def getnodefieldname(idfobject, endswith, fluid=None, startswith=None):
     if startswith is None:
         startswith = ''
     if fluid is None:
+        # TODO: unit test
         fluid = ''
     nodenames = getfieldnamesendswith(idfobject, endswith)
     nodenames = [name for name in nodenames if name.startswith(startswith)]
@@ -204,8 +208,10 @@ def connectcomponents(idf, components, fluid=None):
     fluid is Air or Water or ''.
     if the fluid is Steam, use Water"""
     if fluid is None:
+        # TODO: unit test
         fluid = ''
     if len(components) == 1:
+        # TODO: unit test
         thiscomp, thiscompnode = components[0]
         initinletoutlet(idf, thiscomp, thiscompnode, force=False)
         outletnodename = getnodefieldname(thiscomp, "Outlet_Node_Name",
@@ -241,6 +247,7 @@ def initinletoutlet(idf, idfobject, thisnode, force=False):
                 return False
         except AttributeError: # field may be a list
             return False
+        
     def trimfields(fields, thisnode):
         if len(fields) > 1:
             if thisnode is not None:
@@ -248,6 +255,7 @@ def initinletoutlet(idf, idfobject, thisnode, force=False):
                           if field.startswith(thisnode)]
                 return fields
             else:
+                # TODO: unit test
                 print("Where should this loop connect ?")
                 print("%s - %s" % (idfobject.key, idfobject.Name))
                 print([field.split("Inlet_Node_Name")[0]
@@ -275,6 +283,7 @@ def componentsintobranch(idf, branch, listofcomponents, fluid=None):
     fluid is Air or Water or ''.
     if the fluid is Steam, use Water"""
     if fluid is None:
+        # TODO: unit test
         fluid = ''
     componentlist = [item[0] for item in listofcomponents]
     # assumes that the nodes of the component connect to each other
@@ -302,6 +311,7 @@ def componentsintobranch(idf, branch, listofcomponents, fluid=None):
 
 def doingtesting(testing, testn, result=None):
     """doing testing"""
+    # TODO: We can do better than this
     testn += 1
     if testing == testn:
         print(testing)
@@ -312,6 +322,7 @@ def doingtesting(testing, testn, result=None):
 
 def returnnone():
     """return None"""
+    # TODO: Why do we need this? It's just syntactic sugar for `return None`!
     return None
 
 
@@ -354,6 +365,7 @@ def makecondenserloop(idf, loopname, sloop, dloop):
 
 def makeairloop(idf, loopname, sloop, dloop):
     """make an airloop"""
+    # TODO: unit test
     newloop = idf.newidfobject("AIRLOOPHVAC", loopname)
     newloop = makeloop(idf, newloop, sloop, dloop)
 
@@ -363,6 +375,7 @@ def makeairloop(idf, loopname, sloop, dloop):
 def make_air_demand_loop(idf, dloop):
     """Make the demand side of an air loop
     """
+    # TODO: unit test
     #ZoneHVAC:EquipmentConnections
     for zone in dloop:
         equipconn = idf.newidfobject("ZoneHVAC:EquipmentConnections".upper())
@@ -406,6 +419,7 @@ def make_air_demand_loop(idf, dloop):
 def make_air_splitters_mixers_and_paths(idf, loopname, dloop, newloop):
     """Make splitters and mixers and supply and return paths for an air loop.
     """
+    # TODO: unit test
     # make AirLoopHVAC:ZoneSplitter
     z_splitter = idf.newidfobject("AIRLOOPHVAC:ZONESPLITTER")
     z_splitter.Name = "%s Demand Side Splitter" % (loopname, )
@@ -459,6 +473,7 @@ def makeloop(idf, newloop, sloop, dloop):
     d_branches, s_branches = make_branches(idf, newloop, sloop, dloop)
     
     if newloop.key == 'AIRLOOPHVAC':
+        # TODO: unit test
         make_air_demand_loop(idf, dloop)
         make_air_splitters_mixers_and_paths(idf, newloop.Name, dloop, newloop)
     else:
@@ -499,6 +514,7 @@ def make_branches(idf, newloop, sloop, dloop):
             "BRANCHLIST", 
             newloop.Demand_Side_Branch_List_Name)
     elif newloop.key == 'AIRLOOPHVAC':
+        # TODO: unit test
         supply_branchlist = idf.newidfobject(
             "BRANCHLIST", 
             newloop.Branch_List_Name)
@@ -514,6 +530,7 @@ def make_branches(idf, newloop, sloop, dloop):
         supply_branches.append(branch)
     
     if newloop.key == 'AIRLOOPHVAC':
+        # TODO: unit test
         demand_branchnames = []
     else:
         # add demand branch names to the branchlist
@@ -591,6 +608,7 @@ def make_connectorlists(idf, loopname, newloop):
         s_connlist = idf.newidfobject(
             "CONNECTORLIST", newloop.Plant_Side_Connector_List_Name)
     elif newloop.key == 'AIRLOOPHVAC':
+        # TODO: unit test
         s_connlist = idf.newidfobject(
             "CONNECTORLIST", newloop.Connector_List_Name)
     s_connlist.Connector_1_Object_Type = "Connector:Splitter"
@@ -606,6 +624,7 @@ def make_connectorlists(idf, loopname, newloop):
             "CONNECTORLIST", 
             newloop.Demand_Side_Connector_List_Name)
     elif newloop.key == 'AIRLOOPHVAC':
+        # TODO: unit test
         d_connlist = []
 
     if d_connlist:
@@ -677,6 +696,9 @@ def _clean_listofcomponents_tuples(listofcomponents_tuples):
 
 def getmakeidfobject(idf, key, name):
     """get idfobject or make it if it does not exist"""
+    # TODO: unit test
+    # This is not used here but is a very useful function.
+    # Perhaps move to modeleditor.IDF()?
     idfobject = idf.getobject(key, name)
     if not idfobject:
         return idf.newidfobject(key, name)
@@ -687,6 +709,7 @@ def getmakeidfobject(idf, key, name):
 def replacebranch1(idf, loop, branchname, listofcomponents_tuples, fluid=None,
                    debugsave=False):
     """do I even use this ? .... yup! I do"""
+    # TODO: Unit test if still used
     if fluid is None:
         fluid = ''
     listofcomponents_tuples = _clean_listofcomponents_tuples(listofcomponents_tuples)
@@ -707,7 +730,7 @@ def replacebranch(idf, loop, branch,
     """It will replace the components in the branch with components in
     listofcomponents"""
     if fluid is None:
-        fluid = ''
+        fluid = ''  # never hit in unit tests
 
     # join them into a branch
     # -----------------------
@@ -719,23 +742,29 @@ def replacebranch(idf, loop, branch,
 
     components = [item[0] for item in listofcomponents]
     connectcomponents(idf, listofcomponents, fluid=fluid)
-    if debugsave:
-        print(idf.idfstr())
+    #===========================================================================
+    # if debugsave:
+    #     print(idf.idfstr())
+    #===========================================================================
 #        idf.savecopy("hhh3.idf")
 
     fields = somefields[loop.key]
 
     thebranch = branch
     componentsintobranch(idf, thebranch, listofcomponents, fluid=fluid)
-    if debugsave:
-        print(idf.idfstr())
+    #===========================================================================
+    # if debugsave:
+    #     print(idf.idfstr())
+    #===========================================================================
 #        idf.savecopy("hhh4.idf")
 
     # # gather all renamed nodes
     # # do the renaming
     renamenodes(idf, 'node')
-    if debugsave:
-        print(idf.idfstr())
+    #===========================================================================
+    # if debugsave:
+    #     print(idf.idfstr())
+    #===========================================================================
 #        idf.savecopy("hhh7.idf")
 
     # check for the end nodes of the loop
@@ -747,6 +776,7 @@ def replacebranch(idf, loop, branch,
         supplyconlistname = loop[flnames[3]]
         # Plant_Side_Connector_List_Name or Condenser_Side_Connector_List_Name
     elif fluid.upper() == 'AIR':
+        # TODO: unit test
         supplyconlistname = loop[flnames[1]] # Connector_List_Name'
     supplyconlist = idf.getobject('CONNECTORLIST', supplyconlistname)
     for i in range(1, 100000): # large range to hit end
@@ -756,7 +786,7 @@ def replacebranch(idf, loop, branch,
         except bunch_subclass.BadEPFieldError:
             break
         if ctype.strip() == '':
-            break
+            break  # this is never hit in unit tests
         fieldname = 'Connector_%s_Name' % (i, )
         cname = supplyconlist[fieldname]
         connector = idf.getobject(ctype.upper(), cname)
@@ -780,6 +810,7 @@ def replacebranch(idf, loop, branch,
                     comp[inletnodename],
                     loop[flnames[0]]] # Plant_Side_Inlet_Node_Name
             else:
+                # TODO: unit test
                 comp = comps[-1]
                 outletnodename = getnodefieldname(
                     comp,
@@ -798,7 +829,7 @@ def replacebranch(idf, loop, branch,
             except bunch_subclass.BadEPFieldError:
                 break
             if ctype.strip() == '':
-                break
+                break  # this is never hit in unit tests
             fieldname = 'Connector_%s_Name' % (i, )
             cname = demandconlist[fieldname]
             connector = idf.getobject(ctype.upper(), cname)
@@ -811,6 +842,7 @@ def replacebranch(idf, loop, branch,
                 cbranchname = lastbranchname
                 isfirst = False
             if cbranchname == thebranch.Name:
+                # TODO: unit test
                 # rename end nodes
                 comps = getbranchcomponents(idf, thebranch)
                 if isfirst:
@@ -830,15 +862,19 @@ def replacebranch(idf, loop, branch,
                         comp[outletnodename],
                         loop[flnames[5]]] # .Demand_Side_Outlet_Node_Name
 
-    if debugsave:
-        print(idf.idfstr())
+    #===========================================================================
+    # if debugsave:
+    #     print(idf.idfstr())
+    #===========================================================================
 #        idf.savecopy("hhh8.idf")
 
     # # gather all renamed nodes
     # # do the renaming
     renamenodes(idf, 'node')
 
-    if debugsave:
-        print(idf.idfstr())
+    #===========================================================================
+    # if debugsave:
+    #     print(idf.idfstr())
+    #===========================================================================
 #        idf.savecopy("hhh9.idf")
     return thebranch
