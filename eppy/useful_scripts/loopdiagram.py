@@ -19,6 +19,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import itertools
 import os
 import sys
 
@@ -67,12 +68,9 @@ class LoopDiagram(object):
         nodes = edges2nodes(edges)
         epnodes = [(node, 
             makeanode(node[0])) for node in nodes if nodetype(node)=="epnode"]
-        endnodes = [
-            (node, makeendnode(node[0])) 
-            for node in nodes if nodetype(node)=="EndNode"]
-        epbr = [
+        epbranches = [
             (node, makeabranch(node)) for node in nodes if not istuple(node)]
-        nodedict = dict(epnodes + epbr + endnodes)
+        nodedict = dict(epnodes + epbranches)# + endnodes)
         for value in list(nodedict.values()):
             graph.add_node(value)
         for e1, e2 in edges:
@@ -230,10 +228,13 @@ class AirLoop(object):
     
     @property
     def edges(self):
+        """Edges representing the air loops.
+        """
         edges = []
         # connect supplyplenum to nodes
         supplyplenums = loops.supplyplenumfields(self.data, self.commdct)
         for supplyplenum in supplyplenums:
+            # TODO: unit test
             edges.extend(self.supplyplenum_edges(supplyplenum))
         
         # connect zonesplitter to nodes
@@ -244,6 +245,7 @@ class AirLoop(object):
         # connect zonemixer to nodes
         zonemixers = loops.zonemixerfields(self.data, self.commdct)
         for zonemixer in zonemixers:
+            # TODO: unit test
             edges.extend(self.zonemixer_edges(zonemixer))
         
         # connect returnplenums to nodes
@@ -276,6 +278,7 @@ class AirLoop(object):
         # airinlet -> adistu_component
         allairdist_comps = loops.allairdistcomponentfields(self.data, self.commdct)
         for airdist_comps in allairdist_comps:
+            # TODO: unit test
             for airdist_comp in airdist_comps:
                 name = airdist_comp[0]
                 for airnode in airdist_comp[1:]:
@@ -300,6 +303,7 @@ class AirLoop(object):
         return edges
     
     def supplyplenum_edges(self, supplyplenum):
+        # TODO: Unit test
         name = supplyplenum[0]
         inlet = supplyplenum[3]
         outlets = supplyplenum[4:]
@@ -309,6 +313,7 @@ class AirLoop(object):
         return edges
     
     def zonemixer_edges(self, zonemixer):
+        # TODO: Unit test
         name = zonemixer[0]
         outlet = zonemixer[1]
         inlets = zonemixer[2:]
@@ -328,28 +333,23 @@ class AirLoop(object):
 
 
 def edges2nodes(edges):
-    """gather the nodes from the edges"""
-    nodes = []
-    for e1, e2 in edges:
-        nodes.append(e1)
-        nodes.append(e2)
-    nodedict = dict([(n, None) for n in nodes])
-    justnodes = list(nodedict.keys())
-    # justnodes.sort()
-    justnodes = sorted(justnodes, key=lambda x: str(x[0]))
-    return justnodes
+    """Gather the unique nodes from the edges and return as a sorted list.
+    """
+    nodes = itertools.chain(*edges)
+    unique_nodes = list(set(nodes))
+
+    return sorted(unique_nodes)
     
     
 def makeanode(name):
+    """Make a standard pydot Node representing an EPlus node.
+    """
     return pydot.Node(name, shape="plaintext", label=name)
     
     
-def makeendnode(name):
-    return pydot.Node(name, shape="doubleoctagon", label=name, 
-        style="filled", fillcolor="#e4e4e4")
-    
-    
 def makeabranch(name):
+    """Make a box-shaped pydot Node representing an EPlus branch.
+    """
     return pydot.Node(name, shape="box3d", label=name)
 
 
@@ -358,7 +358,17 @@ def istuple(x):
 
 
 def nodetype(anode):
-    """return the type of node"""
+    """Return the type of node.
+    
+    Parameters
+    ----------
+    anode : tuple
+    
+    Returns
+    -------
+    str or None
+    
+    """
     try:
         return anode[1]
     except IndexError as e:

@@ -7,6 +7,8 @@
 # =======================================================================
 """py.test for loopdiagram.py"""
 #from eppy.useful_scripts.loopdiagram import dropnodes
+#from eppy.useful_scripts.loopdiagram import process_idf
+#from eppy.useful_scripts.loopdiagram import save_diagram
 
 from __future__ import absolute_import
 from __future__ import division
@@ -15,16 +17,15 @@ from __future__ import unicode_literals
 
 import os
 
+from eppy.modeleditor import IDF
 from eppy.pytest_helpers import do_integration_tests
 import pytest
 
+from eppy.useful_scripts.loopdiagram import LoopDiagram
 from eppy.useful_scripts.loopdiagram import clean_edges
 from eppy.useful_scripts.loopdiagram import edges2nodes
 from eppy.useful_scripts.loopdiagram import getedges
-#from eppy.useful_scripts.loopdiagram import process_idf
 from eppy.useful_scripts.loopdiagram import replace_colon
-#from eppy.useful_scripts.loopdiagram import save_diagram
-from eppy.useful_scripts.loopdiagram import LoopDiagram
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -58,11 +59,11 @@ def test_cleanedges():
     """py.test for cleanedges"""
     data = (([('a:a', 'a'), (('a', 'a'), 'a:a'), ('a:a', ('a', 'a'))],
     (('a__a', 'a'), (('a', 'a'), 'a__a'), ('a__a', ('a', 'a')))), 
-    # edg, clean_edg
+    # edge, clean_edge
     )
-    for edg, clean_edg in data:
-        result = clean_edges(edg)
-        assert result == clean_edg
+    for edge, clean_edge in data:
+        result = clean_edges(edge)
+        assert result == clean_edge
         
 
 #@pytest.mark.skipif(
@@ -80,7 +81,7 @@ def test_loopdiagram_simple_integration():
 def test_loopdiagram_airloop_integration():
     """End-to-end smoke test on an example file"""
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
-    fname = os.path.join(IDF_FILES, "V8_1_0/5ZoneAutoDXVAV.idf")
+    fname = os.path.join(IDF_FILES, "V8_1_0/AirLoopDiagramTest.idf")
     diagram = LoopDiagram(fname, idd)
     diagram.save()
 
@@ -91,4 +92,3 @@ def test_getedges():
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")
     getedges(fname, idd)
-    

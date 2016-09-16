@@ -1,0 +1,577 @@
+!- Windows Line endings 
+
+ZoneHVAC:AirDistributionUnit,
+    West Zone ATU,            !- Name
+    West Zone Inlet Node,     !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:VAV:NoReheat,    !- Air Terminal Object Type
+    West Zone VAV System;     !- Air Terminal Name
+
+ZoneHVAC:AirDistributionUnit,
+    East Zone ATU,            !- Name
+    East Zone Inlet Node,     !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:VAV:NoReheat,    !- Air Terminal Object Type
+    East Zone VAV System;     !- Air Terminal Name
+
+ZoneHVAC:EquipmentList,   
+    West Zone Equipment,      !- Name
+    ZoneHVAC:AirDistributionUnit,    !- Zone Equipment 1 Object Type
+    West Zone ATU,            !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    1;                        !- Zone Equipment 1 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentList,   
+    East Zone Equipment,      !- Name
+    ZoneHVAC:AirDistributionUnit,    !- Zone Equipment 1 Object Type
+    East Zone ATU,            !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    1;                        !- Zone Equipment 1 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentConnections,
+    West Zone,                !- Zone Name
+    West Zone Equipment,      !- Zone Conditioning Equipment List Name
+    West Zone Inlets,         !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    West Zone Air Node,       !- Zone Air Node Name
+    West Zone Return Node;    !- Zone Return Air Node Name
+
+ZoneHVAC:EquipmentConnections,
+    East Zone,                !- Zone Name
+    East Zone Equipment,      !- Zone Conditioning Equipment List Name
+    East Zone Inlets,         !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    East Zone Air Node,       !- Zone Air Node Name
+    East Zone Return Node;    !- Zone Return Air Node Name
+
+AirLoopHVAC:ZoneSplitter, 
+    West Supply Air Splitter,    !- Name
+    West Plenum Outlet Node,    !- Inlet Node Name
+    West Zone ATU Inlet Node;    !- Outlet 1 Node Name
+
+AirLoopHVAC:ZoneSplitter, 
+    East Supply Air Splitter,    !- Name
+    East Plenum Outlet Node,    !- Inlet Node Name
+    East Zone ATU Inlet Node;    !- Outlet 1 Node Name
+
+AirLoopHVAC:SupplyPlenum, 
+    West Supply Plenum,       !- Name
+    West Plenum,              !- Zone Name
+    West Plenum Zone Node,    !- Zone Node Name
+    West Zone Equipment Inlet Node,    !- Inlet Node Name
+    West Plenum Outlet Node;    !- Outlet 1 Node Name
+
+AirLoopHVAC:SupplyPlenum, 
+    East Supply Plenum,       !- Name
+    East Plenum,              !- Zone Name
+    East Plenum Zone Node,    !- Zone Node Name
+    East Zone Equipment Inlet Node,    !- Inlet Node Name
+    East Plenum Outlet Node;    !- Outlet 1 Node Name
+
+AirLoopHVAC:ZoneMixer,    
+    Zone Return Air Mixer,    !- Name
+    West Return Air Mixer Outlet,    !- Outlet Node Name
+    West Zone Return Node;    !- Inlet 1 Node Name
+
+AirLoopHVAC:ZoneMixer,    
+    East Return Air Mixer,    !- Name
+    East Return Air Mixer Outlet,    !- Outlet Node Name
+    East Zone Return Node;    !- Inlet 1 Node Name
+
+Branch,                   
+    West Zone Air Loop Main Branch,    !- Name
+    autosize,                 !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    AirLoopHVAC:OutdoorAirSystem,    !- Component 1 Object Type
+    West Zone OA System,      !- Component 1 Name
+    West Zone Return Air Node,    !- Component 1 Inlet Node Name
+    West Zone Mixed Air Node,    !- Component 1 Outlet Node Name
+    ACTIVE,                   !- Component 1 Branch Control Type
+    Fan:VariableVolume,       !- Component 2 Object Type
+    West Zone Supply Fan,     !- Component 2 Name
+    West Zone Mixed Air Node,    !- Component 2 Inlet Node Name
+    West Zone Supply Fan Outlet Node,    !- Component 2 Outlet Node Name
+    ACTIVE,                   !- Component 2 Branch Control Type
+    EvaporativeCooler:Direct:ResearchSpecial,    !- Component 3 Object Type
+    West Data Center DEC,     !- Component 3 Name
+    West Zone Supply Fan Outlet Node,    !- Component 3 Inlet Node Name
+    West Zone DEC Outlet Node,    !- Component 3 Outlet Node Name
+    ACTIVE,                   !- Component 3 Branch Control Type
+    EvaporativeCooler:Indirect:ResearchSpecial,    !- Component 4 Object Type
+    West Data Center IEC,     !- Component 4 Name
+    West Zone DEC Outlet Node,    !- Component 4 Inlet Node Name
+    West Zone IEC Outlet Node,    !- Component 4 Outlet Node Name
+    ACTIVE,                   !- Component 4 Branch Control Type
+    CoilSystem:Cooling:DX,    !- Component 5 Object Type
+    West Zone DX Cooling Coil,    !- Component 5 Name
+    West Zone IEC Outlet Node,    !- Component 5 Inlet Node Name
+    West Zone CCoil Air Outlet Node,    !- Component 5 Outlet Node Name
+    PASSIVE,                  !- Component 5 Branch Control Type
+    Coil:Cooling:Water,       !- Component 6 Object Type
+    West Zone CW Cooling Coil,    !- Component 6 Name
+    West Zone CCoil Air Outlet Node,    !- Component 6 Inlet Node Name
+    West Air Loop Outlet Node,    !- Component 6 Outlet Node Name
+    PASSIVE;                  !- Component 6 Branch Control Type
+
+Branch,                   
+    East Zone Air Loop Main Branch,    !- Name
+    autosize,                 !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    AirLoopHVAC:OutdoorAirSystem,    !- Component 1 Object Type
+    East Zone OA System,      !- Component 1 Name
+    East Zone Return Air Node,    !- Component 1 Inlet Node Name
+    East Zone Mixed Air Node,    !- Component 1 Outlet Node Name
+    ACTIVE,                   !- Component 1 Branch Control Type
+    Fan:VariableVolume,       !- Component 2 Object Type
+    East Zone Supply Fan,     !- Component 2 Name
+    East Zone Mixed Air Node,    !- Component 2 Inlet Node Name
+    East Zone Supply Fan Outlet Node,    !- Component 2 Outlet Node Name
+    ACTIVE,                   !- Component 2 Branch Control Type
+    EvaporativeCooler:Direct:ResearchSpecial,    !- Component 3 Object Type
+    East Data Center DEC,     !- Component 3 Name
+    East Zone Supply Fan Outlet Node,    !- Component 3 Inlet Node Name
+    East Zone DEC Outlet Node,    !- Component 3 Outlet Node Name
+    ACTIVE,                   !- Component 3 Branch Control Type
+    EvaporativeCooler:Indirect:ResearchSpecial,    !- Component 4 Object Type
+    East Data Center IEC,     !- Component 4 Name
+    East Zone DEC Outlet Node,    !- Component 4 Inlet Node Name
+    East Zone IEC Outlet Node,    !- Component 4 Outlet Node Name
+    ACTIVE,                   !- Component 4 Branch Control Type
+    CoilSystem:Cooling:DX,    !- Component 5 Object Type
+    East Zone DX Cooling Coil,    !- Component 5 Name
+    East Zone IEC Outlet Node,    !- Component 5 Inlet Node Name
+    East Zone CCoil Air Outlet Node,    !- Component 5 Outlet Node Name
+    PASSIVE,                  !- Component 5 Branch Control Type
+    Coil:Cooling:Water,       !- Component 6 Object Type
+    East Zone CW Cooling Coil,    !- Component 6 Name
+    East Zone CCoil Air Outlet Node,    !- Component 6 Inlet Node Name
+    East Air Loop Outlet Node,    !- Component 6 Outlet Node Name
+    PASSIVE;                  !- Component 6 Branch Control Type
+
+Branch,                   
+    CW Supply Pump Branch,    !- Name
+    autosize,                 !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pump:VariableSpeed,       !- Component 1 Object Type
+    CW Circ Pump,             !- Component 1 Name
+    CW Supply Inlet Node,     !- Component 1 Inlet Node Name
+    CW Pump Outlet Node,      !- Component 1 Outlet Node Name
+    Active;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    CW Supply Chiller Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Chiller:Electric,         !- Component 1 Object Type
+    Chiller,                  !- Component 1 Name
+    Chiller Inlet Node,       !- Component 1 Inlet Node Name
+    Chiller Outlet Node,      !- Component 1 Outlet Node Name
+    Active;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    CW Supply Bypass Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    CW Supply Side Bypass Pipe,    !- Component 1 Name
+    CW Supply Bypass Inlet Node,    !- Component 1 Inlet Node Name
+    CW Supply Bypass Outlet Node,    !- Component 1 Outlet Node Name
+    BYPASS;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    CW Supply Outlet Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    CW Supply Side Outlet Pipe,    !- Component 1 Name
+    CW Supply Side Exit Pipe Inlet Node,    !- Component 1 Inlet Node Name
+    CW Supply Outlet Node,    !- Component 1 Outlet Node Name
+    PASSIVE;                  !- Component 1 Branch Control Type
+
+Branch,                   
+    CW Demand Inlet Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    CW Demand Side Inlet Pipe,    !- Component 1 Name
+    CW Demand Inlet Node,     !- Component 1 Inlet Node Name
+    CW Demand Entrance Pipe Outlet Node,    !- Component 1 Outlet Node Name
+    PASSIVE;                  !- Component 1 Branch Control Type
+
+Branch,                   
+    West CW Cooling Coil Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Coil:Cooling:Water,       !- Component 1 Object Type
+    West Zone CW Cooling Coil,    !- Component 1 Name
+    West CWCoil Water Inlet Node,    !- Component 1 Inlet Node Name
+    West CWCoil Water Outlet Node,    !- Component 1 Outlet Node Name
+    Active;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    East CW Cooling Coil Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Coil:Cooling:Water,       !- Component 1 Object Type
+    East Zone CW Cooling Coil,    !- Component 1 Name
+    East CWCoil Water Inlet Node,    !- Component 1 Inlet Node Name
+    East CWCoil Water Outlet Node,    !- Component 1 Outlet Node Name
+    Active;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    CW Demand Bypass Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    CW Demand Side Bypass Pipe,    !- Component 1 Name
+    CW Demand Bypass Inlet Node,    !- Component 1 Inlet Node Name
+    CW Demand Bypass Outlet Node,    !- Component 1 Outlet Node Name
+    BYPASS;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    CW Demand Outlet Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    CW Demand Side Outlet Pipe,    !- Component 1 Name
+    CW Demand Exit Pipe Inlet Node,    !- Component 1 Inlet Node Name
+    CW Demand Outlet Node,    !- Component 1 Outlet Node Name
+    PASSIVE;                  !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Supply Pump Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pump:VariableSpeed,       !- Component 1 Object Type
+    Cond Circ Pump,           !- Component 1 Name
+    Condenser Supply Inlet Node,    !- Component 1 Inlet Node Name
+    Condenser Pump Outlet Node,    !- Component 1 Outlet Node Name
+    ACTIVE;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Supply Tower Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    CoolingTower:VariableSpeed,    !- Component 1 Object Type
+    Cooling Tower,            !- Component 1 Name
+    Condenser Tower Inlet Node,    !- Component 1 Inlet Node Name
+    Condenser Tower Outlet Node,    !- Component 1 Outlet Node Name
+    ACTIVE;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Supply Bypass Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    Condenser Supply Bypass Pipe,    !- Component 1 Name
+    Cond Supply Bypass Inlet Node,    !- Component 1 Inlet Node Name
+    Cond Supply Bypass Outlet Node,    !- Component 1 Outlet Node Name
+    BYPASS;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Supply Outlet Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    Condenser Supply Outlet Pipe,    !- Component 1 Name
+    Condenser Supply Exit Pipe Inlet Node,    !- Component 1 Inlet Node Name
+    Condenser Supply Outlet Node,    !- Component 1 Outlet Node Name
+    PASSIVE;                  !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Demand Inlet Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    Condenser Demand Inlet Pipe,    !- Component 1 Name
+    Condenser Demand Inlet Node,    !- Component 1 Inlet Node Name
+    Condenser Demand Entrance Pipe Outlet Node,    !- Component 1 Outlet Node Name
+    PASSIVE;                  !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Demand Chiller Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Chiller:Electric,         !- Component 1 Object Type
+    Chiller,                  !- Component 1 Name
+    Chiller Condenser Inlet Node,    !- Component 1 Inlet Node Name
+    Chiller Condenser Outlet Node,    !- Component 1 Outlet Node Name
+    ACTIVE;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Demand Bypass Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    Condenser Demand Bypass Pipe,    !- Component 1 Name
+    Cond Demand Bypass Inlet Node,    !- Component 1 Inlet Node Name
+    Cond Demand Bypass Outlet Node,    !- Component 1 Outlet Node Name
+    BYPASS;                   !- Component 1 Branch Control Type
+
+Branch,                   
+    Condenser Demand Outlet Branch,    !- Name
+    0,                        !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    Pipe:Adiabatic,           !- Component 1 Object Type
+    Condenser Demand Outlet Pipe,    !- Component 1 Name
+    Condenser Demand Exit Pipe Inlet Node,    !- Component 1 Inlet Node Name
+    Condenser Demand Outlet Node,    !- Component 1 Outlet Node Name
+    PASSIVE;                  !- Component 1 Branch Control Type
+
+Connector:Splitter,       
+    CW Loop Supply Splitter,    !- Name
+    CW Supply Pump Branch,    !- Inlet Branch Name
+    CW Supply Chiller Branch,    !- Outlet Branch 1 Name
+    CW Supply Bypass Branch;    !- Outlet Branch 2 Name
+
+Connector:Splitter,       
+    CW Loop Demand Splitter,    !- Name
+    CW Demand Inlet Branch,    !- Inlet Branch Name
+    West CW Cooling Coil Branch,    !- Outlet Branch 1 Name
+    East CW Cooling Coil Branch,    !- Outlet Branch 2 Name
+    CW Demand Bypass Branch;    !- Outlet Branch 3 Name
+
+Connector:Splitter,       
+    Condenser Supply Splitter,    !- Name
+    Condenser Supply Pump Branch,    !- Inlet Branch Name
+    Condenser Supply Tower Branch,    !- Outlet Branch 1 Name
+    Condenser Supply Bypass Branch;    !- Outlet Branch 2 Name
+
+Connector:Splitter,       
+    Condenser Demand Splitter,    !- Name
+    Condenser Demand Inlet Branch,    !- Inlet Branch Name
+    Condenser Demand Chiller Branch,    !- Outlet Branch 1 Name
+    Condenser Demand Bypass Branch;    !- Outlet Branch 2 Name
+
+Connector:Mixer,          
+    CW Loop Supply Mixer,     !- Name
+    CW Supply Outlet Branch,    !- Outlet Branch Name
+    CW Supply Chiller Branch,    !- Inlet Branch 1 Name
+    CW Supply Bypass Branch;    !- Inlet Branch 2 Name
+
+Connector:Mixer,          
+    CW Loop Demand Mixer,     !- Name
+    CW Demand Outlet Branch,    !- Outlet Branch Name
+    West CW Cooling Coil Branch,    !- Inlet Branch 1 Name
+    East CW Cooling Coil Branch,    !- Inlet Branch 2 Name
+    CW Demand Bypass Branch;    !- Inlet Branch 3 Name
+
+Connector:Mixer,          
+    Condenser Supply Mixer,    !- Name
+    Condenser Supply Outlet Branch,    !- Outlet Branch Name
+    Condenser Supply Tower Branch,    !- Inlet Branch 1 Name
+    Condenser Supply Bypass Branch;    !- Inlet Branch 2 Name
+
+Connector:Mixer,          
+    Condenser Demand Mixer,    !- Name
+    Condenser Demand Outlet Branch,    !- Outlet Branch Name
+    Condenser Demand Chiller Branch,    !- Inlet Branch 1 Name
+    Condenser Demand Bypass Branch;    !- Inlet Branch 2 Name
+	
+!- Windows Line endings 
+
+ZoneHVAC:AirDistributionUnit,
+    SPACE1-1 ATU,             !- Name
+    SPACE1-1 In Node,         !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:VAV:Reheat,    !- Air Terminal Object Type
+    SPACE1-1 VAV Reheat;      !- Air Terminal Name
+
+ZoneHVAC:AirDistributionUnit,
+    SPACE2-1 ATU,             !- Name
+    SPACE2-1 In Node,         !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:VAV:Reheat,    !- Air Terminal Object Type
+    SPACE2-1 VAV Reheat;      !- Air Terminal Name
+
+ZoneHVAC:AirDistributionUnit,
+    SPACE3-1 ATU,             !- Name
+    SPACE3-1 In Node,         !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:VAV:Reheat,    !- Air Terminal Object Type
+    SPACE3-1 VAV Reheat;      !- Air Terminal Name
+
+ZoneHVAC:AirDistributionUnit,
+    SPACE4-1 ATU,             !- Name
+    SPACE4-1 In Node,         !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:VAV:Reheat,    !- Air Terminal Object Type
+    SPACE4-1 VAV Reheat;      !- Air Terminal Name
+
+ZoneHVAC:AirDistributionUnit,
+    SPACE5-1 ATU,             !- Name
+    SPACE5-1 In Node,         !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:VAV:Reheat,    !- Air Terminal Object Type
+    SPACE5-1 VAV Reheat;      !- Air Terminal Name
+
+ZoneHVAC:EquipmentList,   
+    SPACE1-1 Eq,              !- Name
+    ZoneHVAC:AirDistributionUnit,    !- Zone Equipment 1 Object Type
+    SPACE1-1 ATU,             !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    1;                        !- Zone Equipment 1 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentList,   
+    SPACE2-1 Eq,              !- Name
+    ZoneHVAC:AirDistributionUnit,    !- Zone Equipment 1 Object Type
+    SPACE2-1 ATU,             !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    1;                        !- Zone Equipment 1 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentList,   
+    SPACE3-1 Eq,              !- Name
+    ZoneHVAC:AirDistributionUnit,    !- Zone Equipment 1 Object Type
+    SPACE3-1 ATU,             !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    1;                        !- Zone Equipment 1 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentList,   
+    SPACE4-1 Eq,              !- Name
+    ZoneHVAC:AirDistributionUnit,    !- Zone Equipment 1 Object Type
+    SPACE4-1 ATU,             !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    1;                        !- Zone Equipment 1 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentList,   
+    SPACE5-1 Eq,              !- Name
+    ZoneHVAC:AirDistributionUnit,    !- Zone Equipment 1 Object Type
+    SPACE5-1 ATU,             !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    1;                        !- Zone Equipment 1 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentConnections,
+    SPACE1-1,                 !- Zone Name
+    SPACE1-1 Eq,              !- Zone Conditioning Equipment List Name
+    SPACE1-1 In Nodes,        !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    SPACE1-1 Node,            !- Zone Air Node Name
+    SPACE1-1 Out Node;        !- Zone Return Air Node Name
+
+ZoneHVAC:EquipmentConnections,
+    SPACE2-1,                 !- Zone Name
+    SPACE2-1 Eq,              !- Zone Conditioning Equipment List Name
+    SPACE2-1 In Nodes,        !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    SPACE2-1 Node,            !- Zone Air Node Name
+    SPACE2-1 Out Node;        !- Zone Return Air Node Name
+
+ZoneHVAC:EquipmentConnections,
+    SPACE3-1,                 !- Zone Name
+    SPACE3-1 Eq,              !- Zone Conditioning Equipment List Name
+    SPACE3-1 In Nodes,        !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    SPACE3-1 Node,            !- Zone Air Node Name
+    SPACE3-1 Out Node;        !- Zone Return Air Node Name
+
+ZoneHVAC:EquipmentConnections,
+    SPACE4-1,                 !- Zone Name
+    SPACE4-1 Eq,              !- Zone Conditioning Equipment List Name
+    SPACE4-1 In Nodes,        !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    SPACE4-1 Node,            !- Zone Air Node Name
+    SPACE4-1 Out Node;        !- Zone Return Air Node Name
+
+ZoneHVAC:EquipmentConnections,
+    SPACE5-1,                 !- Zone Name
+    SPACE5-1 Eq,              !- Zone Conditioning Equipment List Name
+    SPACE5-1 In Nodes,        !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    SPACE5-1 Node,            !- Zone Air Node Name
+    SPACE5-1 Out Node;        !- Zone Return Air Node Name
+
+AirLoopHVAC:ZoneSplitter, 
+    Zone Supply Air Splitter 1,    !- Name
+    Zone Eq In Node,          !- Inlet Node Name
+    SPACE1-1 ATU In Node,     !- Outlet 1 Node Name
+    SPACE2-1 ATU In Node,     !- Outlet 2 Node Name
+    SPACE3-1 ATU In Node,     !- Outlet 3 Node Name
+    SPACE4-1 ATU In Node,     !- Outlet 4 Node Name
+    SPACE5-1 ATU In Node;     !- Outlet 5 Node Name
+
+AirLoopHVAC:ReturnPlenum, 
+    Return-Plenum-1,          !- Name
+    PLENUM-1,                 !- Zone Name
+    PLENUM-1 Node,            !- Zone Node Name
+    PLENUM-1 Out Node,        !- Outlet Node Name
+    ,                         !- Induced Air Outlet Node or NodeList Name
+    SPACE1-1 Out Node,        !- Inlet 1 Node Name
+    SPACE2-1 Out Node,        !- Inlet 2 Node Name
+    SPACE3-1 Out Node,        !- Inlet 3 Node Name
+    SPACE4-1 Out Node,        !- Inlet 4 Node Name
+    SPACE5-1 Out Node;        !- Inlet 5 Node Name
+
+Branch,                   
+    VAV Sys 1 Main Branch,    !- Name
+    autosize,                 !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    AirLoopHVAC:OutdoorAirSystem,    !- Component 1 Object Type
+    OA Sys 1,                 !- Component 1 Name
+    VAV Sys 1 Inlet Node,     !- Component 1 Inlet Node Name
+    Mixed Air Node 1,         !- Component 1 Outlet Node Name
+    PASSIVE,                  !- Component 1 Branch Control Type
+    CoilSystem:Cooling:DX,    !- Component 2 Object Type
+    DX Cooling Coil System 1,    !- Component 2 Name
+    Mixed Air Node 1,         !- Component 2 Inlet Node Name
+    Main Cooling Coil 1 Outlet Node,    !- Component 2 Outlet Node Name
+    PASSIVE,                  !- Component 2 Branch Control Type
+    Coil:Heating:Gas,         !- Component 3 Object Type
+    Main Heating Coil 1,      !- Component 3 Name
+    Main Cooling Coil 1 Outlet Node,    !- Component 3 Inlet Node Name
+    Main Heating Coil 1 Outlet Node,    !- Component 3 Outlet Node Name
+    PASSIVE,                  !- Component 3 Branch Control Type
+    Fan:VariableVolume,       !- Component 4 Object Type
+    Supply Fan 1,             !- Component 4 Name
+    Main Heating Coil 1 Outlet Node,    !- Component 4 Inlet Node Name
+    VAV Sys 1 Outlet Node,    !- Component 4 Outlet Node Name
+    ACTIVE;                   !- Component 4 Branch Control Type
+
+!- Windows Line endings 
+
+AirTerminal:SingleDuct:Uncontrolled,
+    Main Zone Direct Air,     !- Name
+    System Availability Schedule,    !- Availability Schedule Name
+    Main Zone Inlet Node,     !- Zone Supply Air Node Name
+    1.5;                      !- Maximum Air Flow Rate
+
+ZoneHVAC:EquipmentList,   
+    Main Zone Equipment,      !- Name
+    AirTerminal:SingleDuct:Uncontrolled,    !- Zone Equipment 1 Object Type
+    Main Zone Direct Air,     !- Zone Equipment 1 Name
+    1,                        !- Zone Equipment 1 Cooling Sequence
+    2,                        !- Zone Equipment 1 Heating or NoLoad Sequence
+    ZoneHVAC:Baseboard:Convective:Electric,    !- Zone Equipment 2 Object Type
+    Main Zone Baseboard,      !- Zone Equipment 2 Name
+    2,                        !- Zone Equipment 2 Cooling Sequence
+    1;                        !- Zone Equipment 2 Heating or NoLoad Sequence
+
+ZoneHVAC:EquipmentConnections,
+    Main Zone,                !- Zone Name
+    Main Zone Equipment,      !- Zone Conditioning Equipment List Name
+    Main Zone Inlet Node,     !- Zone Air Inlet Node or NodeList Name
+    ,                         !- Zone Air Exhaust Node or NodeList Name
+    Main Zone Node,           !- Zone Air Node Name
+    Main Zone Outlet Node;    !- Zone Return Air Node Name
+
+AirLoopHVAC:ZoneSplitter, 
+    Zone Supply Air Splitter,    !- Name
+    Zone Equipment Inlet Node,    !- Inlet Node Name
+    Main Zone Inlet Node;     !- Outlet 1 Node Name
+
+AirLoopHVAC:ZoneMixer,    
+    Zone Return Air Mixer,    !- Name
+    Zone Equipment Outlet Node,    !- Outlet Node Name
+    Main Zone Outlet Node;    !- Inlet 1 Node Name
+
+Branch,                   
+    Air Loop Main Branch,     !- Name
+    2.0,                      !- Maximum Flow Rate
+    ,                         !- Pressure Drop Curve Name
+    AirLoopHVAC:OutdoorAirSystem,    !- Component 1 Object Type
+    Outside Air System,       !- Component 1 Name
+    Supply Inlet Node,        !- Component 1 Inlet Node Name
+    Fan Inlet Node,           !- Component 1 Outlet Node Name
+    PASSIVE,                  !- Component 1 Branch Control Type
+    Fan:ConstantVolume,       !- Component 2 Object Type
+    Supply Fan,               !- Component 2 Name
+    Fan Inlet Node,           !- Component 2 Inlet Node Name
+    Evap Cooler Inlet Node,    !- Component 2 Outlet Node Name
+    ACTIVE,                   !- Component 2 Branch Control Type
+    EvaporativeCooler:Direct:CelDekPad,    !- Component 3 Object Type
+    Evaporative Cooler,       !- Component 3 Name
+    Evap Cooler Inlet Node,    !- Component 3 Inlet Node Name
+    Supply Outlet Node,       !- Component 3 Outlet Node Name
+    PASSIVE;                  !- Component 3 Branch Control Type

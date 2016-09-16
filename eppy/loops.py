@@ -1,4 +1,5 @@
 # Copyright (c) 2012 Santosh Philip
+# Copyright (c) 2016 Jamie Bull
 # =======================================================================
 #  Distributed under the MIT License.
 #  (See accompanying file LICENSE or copy at
@@ -34,7 +35,7 @@ def extractfields(data, commdct, objkey, fieldlists):
         try:
             thefieldcomms = dct['field']
             objfields.append(thefieldcomms[0])
-        except KeyError as err:
+        except KeyError as e:
             objfields.append(None)
     fieldindexes = []
     for fieldlist in fieldlists:
@@ -56,53 +57,12 @@ def extractfields(data, commdct, objkey, fieldlists):
             except IndexError as err:
                 break
         fieldcontents.append(innerlst)
-        # fieldcontents.append([theobject[item] for item in fieldindex])
     return fieldcontents
-
-
-def plantloopfieldlists(data):
-    """return the plantloopfield list"""
-    objkey = 'plantloop'.upper()
-    numobjects = len(data.dt[objkey])
-    return [[
-        'Name',
-        'Plant Side Inlet Node Name',
-        'Plant Side Outlet Node Name',
-        'Plant Side Branch List Name',
-        'Demand Side Inlet Node Name',
-        'Demand Side Outlet Node Name',
-        'Demand Side Branch List Name']] * numobjects
-
-
-def plantloopfields(data, commdct):
-    """Get plantloop fields to diagram it
- 
-    - demand inlet, outlet, branchlist
-    - supply inlet, outlet, branchlist
-    
-    """
-    fieldlists = plantloopfieldlists(data)
-    objkey = 'plantloop'.upper()
-    return extractfields(data, commdct, objkey, fieldlists)
-
-
-def branchlist2branches(data, commdct, branchlist):
-    """get branches from the branchlist"""
-    objkey = 'BranchList'.upper()
-    theobjects = data.dt[objkey]
-    fieldlists = []
-    objnames = [obj[1] for obj in theobjects]
-    for theobject in theobjects:
-        fieldlists.append(list(range(2, len(theobject))))
-    blists = extractfields(data, commdct, objkey, fieldlists)
-    thebranches = [branches for name, branches in zip(objnames, blists)
-                   if name == branchlist]
-    return thebranches[0]
 
 
 def branch_inlet_outlet(data, commdct, branchname):
     """return the inlet and outlet of a branch"""
-    objkey = 'Branch'.upper()
+    objkey = "BRANCH"
     theobjects = data.dt[objkey]
     theobject = [obj for obj in theobjects if obj[1] == branchname]
     theobject = theobject[0]
@@ -115,8 +75,6 @@ def splittermixerfieldlists(data, commdct, objkey):
     """docstring for splittermixerfieldlists
     """
     objkey = objkey.upper()
-    objindex = data.dtls.index(objkey)
-    objcomms = commdct[objindex]
     theobjects = data.dt[objkey]
     fieldlists = []
     for theobject in theobjects:
@@ -133,7 +91,7 @@ def splitterfields(data, commdct):
     - outlet2
     
     """
-    objkey = "Connector:Splitter".upper()
+    objkey = "CONNECTOR:SPLITTER"
     fieldlists = splittermixerfieldlists(data, commdct, objkey)
     return extractfields(data, commdct, objkey, fieldlists)
 
@@ -146,7 +104,7 @@ def mixerfields(data, commdct):
     - inlet2
 
     """
-    objkey = "Connector:Mixer".upper()
+    objkey = "CONNECTOR:MIXER"
     fieldlists = splittermixerfieldlists(data, commdct, objkey)
     return extractfields(data, commdct, objkey, fieldlists)
 
@@ -171,7 +129,7 @@ def repeatingfields(theidd, commdct, objkey, flds):
                 if objcomm[i]['field'][0] == thefield:
                     thefields.append(thefield)
                     indx = indx + 1
-            except KeyError as err:
+            except KeyError as e:
                 pass
         allfields.append(thefields)
     allfields = list(zip(*allfields))
@@ -192,7 +150,7 @@ def getfieldindex(data, commdct, objkey, fname):
         try:
             if item['field'] == [fname]:
                 break
-        except KeyError as err:
+        except KeyError as e:
             pass
     return i_index
 
@@ -291,7 +249,7 @@ def uncontrolledfields(data, commdct):
 
 def airdistunitfields(data, commdct):
     #   get Name, equiplist, zoneairnode, returnnode
-    objkey = "ZoneHVAC:AirDistributionUnit".upper()
+    objkey = "ZONEHVAC:AIRDISTRIBUTIONUNIT"
     singlefields = ["Name", "Air Terminal Object Type", "Air Terminal Name"]
     repeatfields = []
     fieldlist = singlefields + repeatfields
@@ -318,7 +276,7 @@ def allairdistcomponentfields(data, commdct):
 
 def getadistus(data, commdct):
     """docstring for fname"""
-    objkey = "ZoneHVAC:AirDistributionUnit".upper()
+    objkey = "ZONEHVAC:AIRDISTRIBUTIONUNIT"
     objindex = data.dtls.index(objkey)
     objcomm = commdct[objindex]
     adistutypefield = "Air Terminal Object Type"
