@@ -38,363 +38,293 @@ except ImportError:
 sys.path.append(PATH_TO_EPPY)
 
 
-def makeairplantloop(data, commdct):
-    """Make the edges for the airloop and the plantloop"""
-    edges = []
-    edges.extend(plantloop_edges(data, commdct))
-    edges.extend(airloop_edges(data, commdct))
-                
-    return edges
-
-
-def plantloop_edges(data, commdct):
-    """Create the edges representing the plant loops.
+class LoopDiagram(object):
+    """Object representing the loop diagram of an IDF.
     """
-    anode = "epnode"
-
-    branch_connections = get_branch_connectors(data, commdct)
-
-    # start with the components of the branch
-    edges = component_edges(data, commdct)
     
-    # connect splitters to nodes
-    splitters = loops.splitterfields(data, commdct)
-    for splitter in splitters:
-        edges.extend(splitter_edges(splitter, branch_connections, anode))
+    def __init__(self, fname, iddfile):
+        """
+        Parameters
+        ----------
+        fname : str
+            Path to the IDF.
+        iddfile : str
+            Path to the IDD.
+            
+        """
+        data, commdct, _ = readidf.readdatacommdct(fname, iddfile=iddfile)
+        self.fname = fname
+        self.data = data
+        self.commdct = commdct
+        self.makediagram()
     
-    # connect mixers to nodes
-    mixers = loops.mixerfields(data, commdct)
-    for mixer in mixers:
-        edges.extend(mixer_edges(mixer, branch_connections, anode))
+    def makediagram(self):
+        """Make the diagram.
+        """
+        edges = self.edges
+        print("making the diagram")
+        graph = pydot.Dot(graph_type='digraph')
+        nodes = edges2nodes(edges)
+        epnodes = [(node, 
+            makeanode(node[0])) for node in nodes if nodetype(node)=="epnode"]
+        endnodes = [
+            (node, makeendnode(node[0])) 
+            for node in nodes if nodetype(node)=="EndNode"]
+        epbr = [
+            (node, makeabranch(node)) for node in nodes if not istuple(node)]
+        nodedict = dict(epnodes + epbr + endnodes)
+        for value in list(nodedict.values()):
+            graph.add_node(value)
+        for e1, e2 in edges:
+            graph.add_edge(pydot.Edge(nodedict[e1], nodedict[e2]))
+        self.graph = graph
+
+    @property
+    def edges(self):
+        """Create the edges for a plant and air loop diagram.
+        
+        Returns
+        -------
+        list
+        
+        """
+        print("constructing the loops")
+        self.plantloop = PlantLoop(self.data, self.commdct)
+        self.airloop = AirLoop(self.data, self.commdct)
+        edges = self.plantloop.edges + self.airloop.edges
+        print("cleaning edges")
+        edges = clean_edges(edges)
     
-    return edges
-
-
-def get_branch_connectors(data, commdct):
-    # get all branches
-    branches = data.dt["BRANCH"]
-    connectors = {}
-    for branch in branches:
-        branch_name = branch[1]
-        in_out = loops.branch_inlet_outlet(data, commdct, branch_name)
-        connectors[branch_name] = dict(list(zip(["inlet", "outlet"], in_out)))
+        return edges
     
-    return connectors
+    def save(self):
+        """Save the diagram as a PNG image and a DOT file.
+        
+        The files will be saved in the same folder as the original IDF.
+        
+        """
+        dotname = '%s.dot' % (os.path.splitext(self.fname)[0])
+        pngname = '%s.png' % (os.path.splitext(self.fname)[0])
+        self.graph.write(dotname)
+        print("saved file: %s" % (dotname))
+        self.graph.write_png(pngname)
+        print("saved file: %s" % (pngname))
 
 
-def component_edges(data, commdct, anode="epnode"):
-    """return the edges joining the components of a branch"""
-    alledges = []
-
-    cnamefield = "Component %s Name"
-    inletfield = "Component %s Inlet Node Name"
-    outletfield = "Component %s Outlet Node Name"
-
-    numobjects = len(data.dt['BRANCH'])
-    cnamefields = loops.repeatingfields(data, commdct, 'BRANCH', cnamefield)
-    inletfields = loops.repeatingfields(data, commdct, 'BRANCH', inletfield)
-    outletfields = loops.repeatingfields(data, commdct, 'BRANCH', outletfield)
-
-    inlets = loops.extractfields(
-        data, commdct, 'BRANCH', [inletfields] * numobjects)
-    components = loops.extractfields(
-        data, commdct, 'BRANCH', [cnamefields] * numobjects)
-    outlets = loops.extractfields(
-        data, commdct, 'BRANCH', [outletfields] * numobjects)
-
-    zipped = list(zip(inlets, components, outlets))
-    tzipped = [transpose2d(item) for item in zipped]
-    for i in range(len(data.dt['BRANCH'])):
-        tt = tzipped[i]
+class PlantLoop(object):
+    
+    def __init__(self, data, commdct):
+        self.data = data
+        self.commdct = commdct
+        self.anode = "epnode"
+    
+    @property
+    def edges(self):
+        """Edges representing the plant loops.
+        """
+        # start with the components of the loop
+        edges = self.components_edges()
+        # connect splitters to component nodes
+        splitters = loops.splitterfields(self.data, self.commdct)
+        for splitter in splitters:
+            edges.extend(self.splitter_edges(splitter))
+        # connect mixers to component nodes
+        mixers = loops.mixerfields(self.data, self.commdct)
+        for mixer in mixers:
+            edges.extend(self.mixer_edges(mixer))
+        
+        return edges
+    
+    def components_edges(self):
+        """Edges joining the components of a branch"""
+        data = self.data
+        commdct = self.commdct
         edges = []
-        for t0 in tt:
-            edges = edges + [((t0[0], anode), t0[1]), (t0[1], (t0[2], anode))]
-        alledges = alledges + edges
-    return alledges
-
-
-def splitter_edges(splitter, branch_connections, anode):
-    # splitter_inlet = inletbranch.node
-    splittername = splitter[0]
-    inletbranchname = splitter[1]
-    outletbranchnames = splitter[2:]
     
-    splitter_inlet = branch_connections[inletbranchname]["outlet"]
-    # edges = splitter_inlet -> splittername
-    edges = [((splitter_inlet, anode), splittername)]
-    # splitter_outlets = ouletbranches.nodes
-    splitter_outlets = [branch_connections[br]["inlet"] for 
-                        br in outletbranchnames]
-    # edges = [splittername -> outlet for outlet in splitter_outlets]
-    edges.extend([(splittername, 
-            (outlet, anode)) for outlet in splitter_outlets])
+        cnamefield = "Component %s Name"
+        inletfield = "Component %s Inlet Node Name"
+        outletfield = "Component %s Outlet Node Name"
     
-    return edges
-
-
-def mixer_edges(mixer, branch_connections, anode):
-    # mixer_outlet = outletbranch.node
-    mixername = mixer[0]
-    outletbranchname = mixer[1]
-    inletbranchnames = mixer[2:]
+        numobjects = len(data.dt['BRANCH'])
+        cnamefields = loops.repeatingfields(
+            data, commdct, 'BRANCH', cnamefield)
+        inletfields = loops.repeatingfields(
+            data, commdct, 'BRANCH', inletfield)
+        outletfields = loops.repeatingfields(
+            data, commdct, 'BRANCH', outletfield)
     
-    mixer_outlet = branch_connections[outletbranchname]["inlet"]
-    # edges = mixername -> mixer_outlet
-    edges = [(mixername, (mixer_outlet, anode))]
-    # mixer_inlets = inletbranches.nodes
-    mixer_inlets = [branch_connections[br]["outlet"]
-                    for br in inletbranchnames]
-    # edges = [mixername -> inlet for inlet in mixer_inlets]
-    edges.extend([((inlet, anode), mixername) for inlet in mixer_inlets])
-
-    return edges
-
-
-def hvac_supplyplenums(data, commdct):
-    #   get Name, Zone Name, Zone Node Name, inlet, all outlets
-    objkey = "AIRLOOPHVAC:SUPPLYPLENUM"
-    singlefields = ["Name", "Zone Name", "Zone Node Name", "Inlet Node Name"]
-    fld = "Outlet %s Node Name"
-    outletfields = loops.repeatingfields(data, commdct, objkey, fld)
-    fieldlist = singlefields + outletfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    supplyplenums = loops.extractfields(data, commdct, objkey, fieldlists)
-
-    return supplyplenums
-
-
-def hvac_zonesplitters(data, commdct):
-    #   get Name, inlet, all outlets
-    objkey = "AIRLOOPHVAC:ZONESPLITTER"
-    singlefields = ["Name", "Inlet Node Name"]
-    fld = "Outlet %s Node Name"
-    repeatfields = loops.repeatingfields(data, commdct, objkey, fld)
-    fieldlist = singlefields + repeatfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    zonesplitters = loops.extractfields(data, commdct, objkey, fieldlists)
-
-    return zonesplitters
-
-
-def hvac_zonemixers(data, commdct):
-    #   get Name, outlet, all inlets
-    objkey = "AIRLOOPHVAC:ZONEMIXER"
-    singlefields = ["Name", "Outlet Node Name"]
-    fld = "Inlet %s Node Name"
-    repeatfields = loops.repeatingfields(data, commdct, objkey, fld)
-    fieldlist = singlefields + repeatfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    zonemixers = loops.extractfields(data, commdct, objkey, fieldlists)
-
-    return zonemixers
-
-
-def hvac_returnplenums(data, commdct):
-    #   get Name, Zone Name, Zone Node Name, outlet, all inlets
-    objkey = "AIRLOOPHVAC:RETURNPLENUM"
-    singlefields = ["Name", "Zone Name", "Zone Node Name", "Outlet Node Name"]
-    fld = "Inlet %s Node Name"
-    repeatfields = loops.repeatingfields(data, commdct, objkey, fld)
-    fieldlist = singlefields + repeatfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    returnplenums = loops.extractfields(data, commdct, objkey, fieldlists)
-    return returnplenums
-
-
-def hvac_equipmentconnections(data, commdct):
-    #   get Name, equiplist, zoneairnode, returnnode
-    objkey = "ZONEHVAC:EQUIPMENTCONNECTIONS"
-    singlefields = ["Zone Name", "Zone Conditioning Equipment List Name", 
-                    "Zone Air Node Name", "Zone Return Air Node Name"]
-    repeatfields = []
-    fieldlist = singlefields + repeatfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    equipconnections = loops.extractfields(data, commdct, objkey, fieldlists)
-    return equipconnections
-
-
-def hvac_equipmentlist(data, commdct):
-    #   get Name, all equiptype, all equipnames
-    objkey = "ZONEHVAC:EQUIPMENTLIST"
-    singlefields = ["Name"]
-    fieldlist = singlefields
-    flds = ["Zone Equipment %s Object Type", "Zone Equipment %s Name"]
-    repeatfields = loops.repeatingfields(data, commdct, objkey, flds)
-    fieldlist = fieldlist + repeatfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    equiplists = loops.extractfields(data, commdct, objkey, fieldlists)
-    equiplistdct = dict([(ep[0], ep[1:]) for ep in equiplists])
-    for key, equips in list(equiplistdct.items()):
-        enames = [equips[i] for i in range(1, len(equips), 2)]
-        equiplistdct[key] = enames
+        inlets = loops.extractfields(
+            data, commdct, 'BRANCH', [inletfields] * numobjects)
+        components = loops.extractfields(
+            data, commdct, 'BRANCH', [cnamefields] * numobjects)
+        outlets = loops.extractfields(
+            data, commdct, 'BRANCH', [outletfields] * numobjects)
     
-    return equiplistdct
+        zipped = list(zip(inlets, components, outlets))
+        tzipped = [transpose2d(item) for item in zipped]
+        for item in tzipped:
+            for inlet, component, outlet in item:
+                edges.append(((inlet, 'epnode'), component))  # inlet edge
+                edges.append((component, (outlet, 'epnode')))  # outlet edge
+        return edges
 
+    def splitter_edges(self, splitter):
+        """Edges connecting a splitter to component branches.
+        """
+        inlet = splitter[1]
+        outletbranches = splitter[2:]
+        splitter = splitter[0]
 
-def hvac_uncontrolleds(data, commdct):
-    #   get Name, airinletnode
-    objkey = "AIRTERMINAL:SINGLEDUCT:UNCONTROLLED"
-    singlefields = ["Name", "Zone Supply Air Node Name"]
-    repeatfields = []
-    fieldlist = singlefields + repeatfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    uncontrolleds = loops.extractfields(data, commdct, objkey, fieldlists)
-    return uncontrolleds
-
-
-def zonesplitter_edges(zonesplitter, anode):
-    name = zonesplitter[0]
-    inlet = zonesplitter[1]
-    outlets = zonesplitter[2:]
-    edges = [((inlet, anode), name)]
-    edges.extend([(name, (outlet, anode)) for outlet in outlets])
+        branch_connectors = self.branch_connectors()
+        splitter_inlet = branch_connectors[inlet]["outlet"]
+        splitter_outlets = [
+            branch_connectors[branch]["inlet"] for branch in outletbranches]
+        edges = []
+        edges.extend([((splitter_inlet, 'epnode'), splitter)])
+        edges.extend([(splitter, (outlet, 'epnode')) 
+                      for outlet in splitter_outlets])
+        return edges
     
-    return edges
+    def mixer_edges(self, mixer):
+        """Edges connecting component branches to a mixer.
+        """
+        mixername = mixer[0]
+        outletbranchname = mixer[1]
+        inletbranches = mixer[2:]
+        
+        branch_connectors = self.branch_connectors()
+        mixer_outlet = branch_connectors[outletbranchname]["inlet"]
+        mixer_inlets = [branch_connectors[branch]["outlet"]
+                        for branch in inletbranches]
+        edges = []
+        edges.extend([(mixername, (mixer_outlet, 'epnode'))])
+        edges.extend([((inlet, 'epnode'), mixername) 
+                      for inlet in mixer_inlets])    
+        return edges
+
+    def branch_connectors(self):
+        """Mapping from branch names to their inlet and outlet connectors.
+        
+        Returns
+        -------
+        dict
+        
+        """
+        branches = self.data.dt["BRANCH"]
+        connectors = {}
+        for branch in branches:
+            branch_name = branch[1]
+            in_out = loops.branch_inlet_outlet(
+                self.data, self.commdct, branch_name)
+            connectors[branch_name] = dict(
+                list(zip(["inlet", "outlet"], in_out)))
+        
+        return connectors
 
 
-def supplyplenum_edges(supplyplenum, anode):
-    name = supplyplenum[0]
-    inlet = supplyplenum[3]
-    outlets = supplyplenum[4:]
-    edges = [((inlet, anode), name)]
-    edges.extend([(name, (outlet, anode)) for outlet in outlets])
+class AirLoop(object):
     
-    return edges
-
-
-def zonemixer_edges(zonemixer, anode):
-    name = zonemixer[0]
-    outlet = zonemixer[1]
-    inlets = zonemixer[2:]
-    edges = [(name, (outlet, anode))]
-    edges.extend([((inlet, anode), name) for inlet in inlets])
+    def __init__(self, data, commdct):
+        self.data = data
+        self.commdct = commdct
     
-    return edges
+    @property
+    def edges(self):
+        edges = []
+        # connect supplyplenum to nodes
+        supplyplenums = loops.supplyplenumfields(self.data, self.commdct)
+        for supplyplenum in supplyplenums:
+            edges.extend(self.supplyplenum_edges(supplyplenum))
+        
+        # connect zonesplitter to nodes
+        zonesplitters = loops.zonesplitterfields(self.data, self.commdct)
+        for zonesplitter in zonesplitters:
+            edges.extend(self.zonesplitter_edges(zonesplitter))
+        
+        # connect zonemixer to nodes
+        zonemixers = loops.zonemixerfields(self.data, self.commdct)
+        for zonemixer in zonemixers:
+            edges.extend(self.zonemixer_edges(zonemixer))
+        
+        # connect returnplenums to nodes
+        returnplenums = loops.returnplenumfields(self.data, self.commdct)
+        for returnplenum in returnplenums:
+            edges.extend(self.returnplenum_edges(returnplenum))
+        
+        # connect room to return node
+        equipconnections = loops.equipmentconnectionfields(self.data, self.commdct)
+        for equipconnection in equipconnections:
+            zonename = equipconnection[0]
+            returnnode = equipconnection[-1]
+            edges.append((zonename, (returnnode)))
+        
+        # connect equips to room
+        equipmentlist = loops.equipmentlistfields(self.data, self.commdct)
+        for equipconnection in equipconnections:
+            zonename = equipconnection[0]
+            zequiplistname = equipconnection[1]
+            for zequip in equipmentlist[zequiplistname]:
+                edges.append((zequip, zonename))
+        
+        # airdistunit <- adistu_component
+        airdistunits = loops.airdistunitfields(self.data, self.commdct)
+        for airdistunit in airdistunits:
+            unitname = airdistunit[0]
+            compname = airdistunit[2]
+            edges.append((compname, unitname))
+        
+        # airinlet -> adistu_component
+        allairdist_comps = loops.allairdistcomponentfields(self.data, self.commdct)
+        for airdist_comps in allairdist_comps:
+            for airdist_comp in airdist_comps:
+                name = airdist_comp[0]
+                for airnode in airdist_comp[1:]:
+                    edges.append(((airnode, 'epnode'), name))
+        
+        # supplyairnode -> uncontrolled
+        uncontrolleds = loops.uncontrolledfields(self.data, self.commdct)
+        for uncontrolled in uncontrolleds:
+            name = uncontrolled[0]
+            airnode = uncontrolled[1]
+            edges.append(((airnode, 'epnode'), name))
+        
+        return edges
 
-
-def returnplenum_edges(returnplenum, anode):
-    name = returnplenum[0]
-    outlet = returnplenum[3]
-    inlets = returnplenum[4:]
-    edges = [(name, (outlet, anode))]
-    edges.extend([((inlet, anode), name) for inlet in inlets])
+    def zonesplitter_edges(self, zonesplitter):
+        name = zonesplitter[0]
+        inlet = zonesplitter[1]
+        outlets = zonesplitter[2:]
+        edges = [((inlet, 'epnode'), name)]
+        edges.extend([(name, (outlet, 'epnode')) for outlet in outlets])
+        
+        return edges
     
-    return edges
-
-
-def hvac_airdistunits(data, commdct):
-    #   get Name, equiplist, zoneairnode, returnnode
-    objkey = "ZoneHVAC:AirDistributionUnit".upper()
-    singlefields = ["Name", "Air Terminal Object Type", "Air Terminal Name"]
-    repeatfields = []
-    fieldlist = singlefields + repeatfields
-    fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-    adistuunits = loops.extractfields(data, commdct, objkey, fieldlists)
-    return adistuunits
-
-
-def hvac_allairdistcomponents(data, commdct):
-    #   get Name, airinletnode
-    adistuinlets = loops.makeadistu_inlets(data, commdct)
-    alladistu_comps = []
-    for key in list(adistuinlets.keys()):
-        objkey = key.upper()
-        singlefields = ["Name"] + adistuinlets[key]
-        repeatfields = []
-        fieldlist = singlefields + repeatfields
-        fieldlists = [fieldlist] * loops.objectcount(data, objkey)
-        adistu_components = loops.extractfields(data, commdct, objkey, fieldlists)
-        alladistu_comps.append(adistu_components)
+    def supplyplenum_edges(self, supplyplenum):
+        name = supplyplenum[0]
+        inlet = supplyplenum[3]
+        outlets = supplyplenum[4:]
+        edges = [((inlet, 'epnode'), name)]
+        edges.extend([(name, (outlet, 'epnode')) for outlet in outlets])
+        
+        return edges
     
-    return alladistu_comps
-
-
-def airloop_edges(data, commdct):
-    # -----------air loop stuff----------------------
-
-    # adistuunit -> room    
-    # adistuunit <- VAVreheat 
-    # airinlet -> VAVreheat
-
-    # code only for AirTerminal:SingleDuct:VAV:Reheat
-    # get airinletnodes for vavreheats
-    # in AirTerminal:SingleDuct:VAV:Reheat:
-    anode = "epnode"
-    edges = []
-    # connect zonesplitter to nodes
-    zonesplitters = hvac_zonesplitters(data, commdct)
-    for zonesplitter in zonesplitters:
-        edges.extend(zonesplitter_edges(zonesplitter, anode))
+    def zonemixer_edges(self, zonemixer):
+        name = zonemixer[0]
+        outlet = zonemixer[1]
+        inlets = zonemixer[2:]
+        edges = [(name, (outlet, 'epnode'))]
+        edges.extend([((inlet, 'epnode'), name) for inlet in inlets])
+        
+        return edges
     
-    # connect supplyplenum to nodes
-    supplyplenums = hvac_supplyplenums(data, commdct)
-    for supplyplenum in supplyplenums:
-        edges.extend(supplyplenum_edges(supplyplenum, anode))
-    
-    # connect zonemixer to nodes
-    zonemixers = hvac_zonemixers(data, commdct)
-    for zonemixer in zonemixers:
-        edges.extend(zonemixer_edges(zonemixer, anode))
-    
-    # connect returnplenums to nodes
-    returnplenums = hvac_returnplenums(data, commdct)
-    for returnplenum in returnplenums:
-        edges.extend(returnplenum_edges(returnplenum, anode))
-    
-    # connect room to return node
-    equipconnections = hvac_equipmentconnections(data, commdct)
-    for equipconnection in equipconnections:
-        zonename = equipconnection[0]
-        returnnode = equipconnection[-1]
-        edges.append((zonename, (returnnode, anode)))
-    
-    # connect equips to room
-    equipmentlist = hvac_equipmentlist(data, commdct)
-    for equipconnection in equipconnections:
-        zonename = equipconnection[0]
-        zequiplistname = equipconnection[1]
-        for zequip in equipmentlist[zequiplistname]:
-            edges.append((zequip, zonename))
-    
-    # airdistunit <- adistu_component
-    airdistunits = hvac_airdistunits(data, commdct)
-    for airdistunit in airdistunits:
-        unitname = airdistunit[0]
-        compname = airdistunit[2]
-        edges.append((compname, unitname))
-    
-    # airinlet -> adistu_component
-    allairdist_comps = hvac_allairdistcomponents(data, commdct)
-    for airdist_comps in allairdist_comps:
-        for airdist_comp in airdist_comps:
-            name = airdist_comp[0]
-            for airnode in airdist_comp[1:]:
-                edges.append(((airnode, anode), name))
-    
-    # supplyairnode -> uncontrolled
-    uncontrolleds = hvac_uncontrolleds(data, commdct)
-    for uncontrolled in uncontrolleds:
-        name = uncontrolled[0]
-        airnode = uncontrolled[1]
-        edges.append(((airnode, anode), name))
-    
-    return edges
-
-def makediagram(edges):
-    """make the diagram with the edges"""
-    graph = pydot.Dot(graph_type='digraph')
-    nodes = edges2nodes(edges)
-    epnodes = [(node, 
-        makeanode(node[0])) for node in nodes if nodetype(node)=="epnode"]
-    endnodes = [(node, 
-        makeendnode(node[0])) for node in nodes if nodetype(node)=="EndNode"]
-    epbr = [(node, makeabranch(node)) for node in nodes if not istuple(node)]
-    nodedict = dict(epnodes + epbr + endnodes)
-    for value in list(nodedict.values()):
-        graph.add_node(value)
-    for e1, e2 in edges:
-        graph.add_edge(pydot.Edge(nodedict[e1], nodedict[e2]))
-    return graph
+    def returnplenum_edges(self, returnplenum):
+        name = returnplenum[0]
+        outlet = returnplenum[3]
+        inlets = returnplenum[4:]
+        edges = [(name, (outlet, 'epnode'))]
+        edges.extend([((inlet, 'epnode'), name) for inlet in inlets])
+        
+        return edges
 
 
 def edges2nodes(edges):
@@ -453,15 +383,9 @@ def transpose2d(mtx):
 
 def getedges(fname, iddfile):
     """return the edges of the idf file fname"""
-    data, commdct, idd_index = readidf.readdatacommdct(fname, iddfile=iddfile)
-    edges = makeairplantloop(data, commdct)
-    return edges
+    diagram = LoopDiagram(fname, iddfile)
+    return diagram.edges
 
-
-def replace_colon(s, replacewith='__'):
-    """replace the colon with something"""
-    return s.replace(":", replacewith)
-    
 
 def clean_edges(arg):
     if isinstance(arg, string_types):
@@ -472,30 +396,10 @@ def clean_edges(arg):
         return replace_colon(arg) # not a sequence so just return repr
 
     
-def make_and_save_diagram(fname, iddfile):
-    g = process_idf(fname, iddfile)
-    save_diagram(fname, g)
-
-
-def process_idf(fname, iddfile):
-    data, commdct, _iddindex = readidf.readdatacommdct(fname, iddfile=iddfile)
-    print("constructing the loops")
-    edges = makeairplantloop(data, commdct)
-    print("cleaning edges")
-    edges = clean_edges(edges)
-    print("making the diagram")
-
-    return makediagram(edges)
-
+def replace_colon(s, replacewith='__'):
+    """replace the colon with something"""
+    return s.replace(":", replacewith)
     
-def save_diagram(fname, g):
-    dotname = '%s.dot' % (os.path.splitext(fname)[0])
-    pngname = '%s.png' % (os.path.splitext(fname)[0])
-    g.write(dotname)
-    print("saved file: %s" % (dotname))
-    g.write_png(pngname)
-    print("saved file: %s" % (pngname))
-
 
 def main():
     parser = argparse.ArgumentParser(usage=None, 
@@ -509,7 +413,8 @@ def main():
         help='location of idf file = ./somewhere/f1.idf',
         required=True)
     args = parser.parse_args()
-    make_and_save_diagram(args.file, args.idd)
+    diagram = LoopDiagram(args.file, args.idd)
+    diagram.save()
 
 
 if __name__ == "__main__":

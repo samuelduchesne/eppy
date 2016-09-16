@@ -21,10 +21,10 @@ import pytest
 from eppy.useful_scripts.loopdiagram import clean_edges
 from eppy.useful_scripts.loopdiagram import edges2nodes
 from eppy.useful_scripts.loopdiagram import getedges
-from eppy.useful_scripts.loopdiagram import process_idf
+#from eppy.useful_scripts.loopdiagram import process_idf
 from eppy.useful_scripts.loopdiagram import replace_colon
-from eppy.useful_scripts.loopdiagram import save_diagram
-#from eppy.useful_scripts.loopdiagram import LoopDiagram
+#from eppy.useful_scripts.loopdiagram import save_diagram
+from eppy.useful_scripts.loopdiagram import LoopDiagram
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -71,15 +71,9 @@ def test_loopdiagram_simple_integration():
     """End-to-end smoke test on an example file"""
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")
-    g = process_idf(fname, idd)
-    save_diagram(fname, g)
+    diagram = LoopDiagram(fname, idd)
+    diagram.save()
 
-def test_newloopdiagram_simple_integration():
-    """End-to-end smoke test on an example file"""
-    idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
-    fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")
-#    diagram = LoopDiagram(fname, idd)
-#    diagram.save()
 
 #@pytest.mark.skipif(
 #    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
@@ -87,8 +81,9 @@ def test_loopdiagram_airloop_integration():
     """End-to-end smoke test on an example file"""
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/5ZoneAutoDXVAV.idf")
-    g = process_idf(fname, idd)
-    save_diagram(fname, g)
+    diagram = LoopDiagram(fname, idd)
+    diagram.save()
+
 
 #@pytest.mark.skipif(
 #    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
