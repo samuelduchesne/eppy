@@ -72,19 +72,11 @@ def test_loopdiagram_simple_integration():
     diagram.save()
 
 
-#@pytest.mark.skipif(
-#    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
+@pytest.mark.skipif(
+    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
 def test_loopdiagram_airloop_integration():
     """End-to-end smoke test on an example file"""
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
-    fname = os.path.join(IDF_FILES, "V8_1_0/5ZoneAutoDXVAV.idf")
+    fname = os.path.join(IDF_FILES, "V8_1_0/AirLoopDiagramTest.idf")
     diagram = LoopDiagram(fname, idd)
     diagram.save()
-
-
-@pytest.mark.skipif(
-    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
-def test_getedges():
-    idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
-    fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")
-    getedges(fname, idd)
