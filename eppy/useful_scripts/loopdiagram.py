@@ -412,11 +412,9 @@ def main():
                 formatter_class=argparse.RawTextHelpFormatter)
                 # need the formatter to print newline from __doc__
     parser.add_argument('idd', type=str, action='store', 
-        help='location of idd file = ./somewhere/eplusv8-0-1.idd',
-        required=True)
+        help='location of idd file = ./somewhere/eplusv8-0-1.idd')
     parser.add_argument('file', type=str, action='store', 
-        help='location of idf file = ./somewhere/f1.idf',
-        required=True)
+        help='location of idf file = ./somewhere/f1.idf')
     args = parser.parse_args()
     diagram = LoopDiagram(args.file, args.idd)
     diagram.save()

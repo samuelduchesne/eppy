@@ -99,27 +99,28 @@ class Branch(EppyHVAC):
         for i, component in enumerate(self.components, 1):
             # get/set the inlet and outlet node names
             # first one is the c1 inlet
-            if i == 1:
-                if component.inlet == '':
+            if component.inlet == '':
+                if i == 1:
                     inlet_name = '%s_inlet' % component.Name
                 else:
                     inlet_name = '%s_%s_inlet' % (
-                        self.components[i].Name, self.components[i+1].Name)
+                    self.components[i-2].Name, self.components[i-1].Name)
                 component.set_inlet(inlet_name)
+
             # last one is the cn outlet
-            if i == len(self):
-                if component.outlet == '':
+            if component.outlet == '':
+                if i == len(self):
                     outlet_name = '%s_outlet' % component.Name
                 else:
                     outlet_name = '%s_%s_outlet' % (
-                        self.components[i].Name, self.components[i+1].Name)
+                        self.components[i-1].Name, self.components[i].Name)
                 component.set_outlet(outlet_name)
             # intermediate ones are named as c1_c2_inlet and c1_c2_outlet
-            branch.Component_1_Object_Type = component.key
-            branch.Component_1_Name = component.Name
-            branch.Component_1_Inlet_Node_Name = component.inlet
-            branch.Component_1_Outlet_Node_Name = component.outlet
-            branch.Component_1_Branch_Control_Type = "Bypass"
+            branch['Component_%i_Object_Type' % i] = component.key
+            branch['Component_%i_Name' % i] = component.Name
+            branch['Component_%i_Inlet_Node_Name' % i] = component.inlet
+            branch['Component_%i_Outlet_Node_Name' % i] = component.outlet
+            branch['Component_%i_Branch_Control_Type' % i] = "Bypass"
     
         self.bunch = branch
 
@@ -212,10 +213,22 @@ def test_branch_one_component():
     assert len(branch) == 1
     assert branch.components[0].key == 'BOILER:HOTWATER'
     assert branch.components[0].Name == 'boiler'
-    print(branch.components[0])
     assert (branch.components[0].Boiler_Water_Inlet_Node_Name == 
             branch.components[0].inlet)
     assert (branch.components[0].Boiler_Water_Outlet_Node_Name ==
             branch.components[0].outlet)
+    
+def test_branch_two_components():
+    idf = IDF()
+    idf.new()
+    boiler = idf.newidfobject('BOILER:HOTWATER', 'boiler')
+    pipe = idf.newidfobject('PIPE:ADIABATIC', 'pipe')
+    components = [boiler, pipe] 
+    branch = Branch(idf, 'boiler_and_pipe_branch', components)
+    assert len(branch.components) == 2
+    assert len(branch) == 2
+    print(branch.components[0])
+    print(branch)
+
 
     
