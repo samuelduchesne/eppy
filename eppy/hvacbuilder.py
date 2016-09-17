@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 
 import copy
 
-from eppy.bunchhelpers import makefieldname
+from eppy.bunchhelpers import sanitizefieldname
 
 import eppy.bunch_subclass as bunch_subclass
 import eppy.modeleditor as modeleditor
@@ -20,9 +20,8 @@ import eppy.modeleditor as modeleditor
 
 class WhichLoopError(Exception):
     pass
-
-
-somefields = {'CONDENSERLOOP': [
+    
+loopfields = {'CONDENSERLOOP': [
                 'Condenser Side Inlet Node Name',
                 'Condenser Side Outlet Node Name',
                 'Condenser Side Branch List Name',
@@ -50,75 +49,231 @@ somefields = {'CONDENSERLOOP': [
               }
 
 
-def flattencopy(lst):
-    """flatten and return a copy of the list
-    inefficient on large lists"""
-    # modified from
-    # http://stackoverflow.com/questions/2158395/flatten-an-irregular-list-of-lists-in-python
-    thelist = copy.deepcopy(lst)
-    list_is_nested = True
-    while list_is_nested:                 #outer loop
-        keepchecking = False
-        atemp = []
-        for element in thelist:         #inner loop
-            if isinstance(element, list):
-                atemp.extend(element)
-                keepchecking = True
-            else:
-                atemp.append(element)
-        list_is_nested = keepchecking     #determine if outer loop exits
-        thelist = atemp[:]
-    return thelist
+def makeplantloop(idf, loopname, sloop, dloop):
+    """Make plant loop with pipe components.
+    
+    Parameters
+    ----------
+    idf : IDF object
+        The IDF.
+    loopname : str
+        Name for the loop.
+    sloop : list
+        A list of names for each branch on the supply loop.
+        Example: ['s_inlet', ['boiler', 'bypass'], 's_outlet]
+    dloop : list
+        A list of names for each branch on the loop.
+        Example: ['d_inlet', ['zone1', 'zone2'], 'd_outlet]
+    
+    Returns
+    -------
+    EPBunch
+
+    """
+    newloop = idf.newidfobject("PLANTLOOP", loopname)
+    newloop = makeloop(idf, newloop, sloop, dloop)
+    return newloop
 
 
-def makepipecomponent(idf, pname):
-    """make a pipe component
-    generate inlet outlet names"""
-    apipe = idf.newidfobject("Pipe:Adiabatic".upper(), pname)
-    apipe.Inlet_Node_Name = "%s_inlet" % (pname, )
-    apipe.Outlet_Node_Name = "%s_outlet" % (pname, )
-    return apipe
+def makecondenserloop(idf, loopname, sloop, dloop):
+    """Make loop with pipe components
+
+    Parameters
+    ----------
+    idf : IDF object
+        The IDF.
+    loopname : str
+        Name for the loop.
+    sloop : list
+        A list of names for each branch on the supply loop.
+        Example: ['s_inlet', ['tower', 'supply bypass'], 's_outlet]
+    dloop : list
+        A list of names for each branch on the loop.
+        Example: ['d_inlet', ['chiller condenser', 'demand bypass'], 'd_outlet]
+    
+    Returns
+    -------
+    EPBunch
+
+    """
+    newloop = idf.newidfobject("CONDENSERLOOP", loopname)
+    newloop = makeloop(idf, newloop, sloop, dloop)
+    return newloop
 
 
-def makeductcomponent(idf, dname):
-    """make a duct component
-    generate inlet outlet names"""
-    aduct = idf.newidfobject("duct".upper(), dname)
-    aduct.Inlet_Node_Name = "%s_inlet" % (dname, )
-    aduct.Outlet_Node_Name = "%s_outlet" % (dname, )
-    return aduct
+def makeairloop(idf, loopname, sloop, dloop):
+    """Make an airloop with pipe components.
+    Parameters
+    ----------
+    idf : IDF object
+        The IDF.
+    loopname : str
+        Name for the loop.
+    sloop : list
+        A list of names for each branch on the supply loop.
+        Example: ['s_inlet', ['oa sys'], 's_outlet]
+    dloop : list
+        A list of names for each branch on the loop.
+        Example: ['d_inlet', ['zone1', 'zone2'], 'd_outlet]
+    
+    Returns
+    -------
+    EPBunch
+
+    """
+    # TODO: unit test
+    newloop = idf.newidfobject("AIRLOOPHVAC", loopname)
+    newloop = makeloop(idf, newloop, sloop, dloop)
+
+    return newloop
 
 
-def makepipebranch(idf, bname):
+def makeloop(idf, newloop, sloop, dloop):
+    """Make an air loop, condenser loop or plant loop.
+
+    Parameters
+    ----------
+    idf : IDF object
+        The IDF.
+    newloop : EPBunch
+        The loop object.
+    sloop : list
+        A list of names for each branch on the supply loop.
+        Example: ['s_inlet', ['tower', 'supply bypass'], 's_outlet]
+    dloop : list
+        A list of names for each branch on the loop.
+        Example: ['d_inlet', ['chiller condenser', 'demand bypass'], 'd_outlet]
+    
+    Returns
+    -------
+    EPBunch
+
+    """
+    fields = loopfields[newloop.key]
+
+    initialise_loop(newloop, fields)
+
+    s_branches, d_branches = make_branches(idf, newloop, sloop, dloop)
+    
+    if newloop.key == 'AIRLOOPHVAC':
+        make_air_demand_loop(idf, dloop)
+        make_air_splitters_mixers_and_paths(idf, newloop.Name, dloop, newloop)
+    else:
+        rename_endpoints(idf, newloop, d_branches, s_branches)
+
+    s_connlist, d_connlist = make_connectorlists(idf, newloop.Name, newloop)
+    make_splitters_and_mixers(idf, sloop, dloop, s_connlist, d_connlist)
+
+    return newloop
+
+
+def initialise_loop(newloop, fields):
+    """Initialise fields in a loop.
+    
+    These vary by type of loop.
+    
+    """
+    # for use in bunch
+    flnames = [sanitizefieldname(f) for f in fields]
+    # simplify naming
+    fields = simplify_names(fields)
+    # make fieldnames in the loop
+    fieldnames = ['%s %s' % (newloop.Name, field) for field in fields]
+    for fieldname, thefield in zip(fieldnames, flnames):
+        newloop[thefield] = fieldname
+
+
+def make_branches(idf, newloop, sloop, dloop):
+    """Make the branch lists for this loop
+    """
+    if newloop.key == 'CONDENSERLOOP':
+        supply_branchlist = idf.newidfobject(
+            "BRANCHLIST", 
+            newloop.Condenser_Side_Branch_List_Name)
+        demand_branchlist = idf.newidfobject(
+            "BRANCHLIST", 
+            newloop.Condenser_Demand_Side_Branch_List_Name)
+    elif newloop.key == 'PLANTLOOP':
+        supply_branchlist = idf.newidfobject(
+            "BRANCHLIST", 
+            newloop.Plant_Side_Branch_List_Name)
+        demand_branchlist = idf.newidfobject(
+            "BRANCHLIST", 
+            newloop.Demand_Side_Branch_List_Name)
+    elif newloop.key == 'AIRLOOPHVAC':
+        # TODO: unit test
+        supply_branchlist = idf.newidfobject(
+            "BRANCHLIST", 
+            newloop.Branch_List_Name)
+        
+    # add supply branch names to the branchlist
+    supply_branchnames = flattencopy(sloop)
+    for branchname in supply_branchnames:
+        supply_branchlist.obj.append(branchname)
+    # make a pipe branch for all supply branches in the loop
+    supply_branches = [pipebranch(idf, branchname) 
+                       for branchname in supply_branchnames]
+    
+    if newloop.key == 'AIRLOOPHVAC':
+        # TODO: unit test
+        demand_branchnames = []
+    else:
+        # add demand branch names to the branchlist
+        demand_branchnames = flattencopy(dloop)
+        for branchname in demand_branchnames:
+            demand_branchlist.obj.append(branchname)
+    
+    return supply_branches, demand_branchnames
+
+
+def pipebranch(idf, branchname):
     """make a branch with a pipe
     use standard inlet outlet names"""
     # make the pipe component first
-    pname = "%s_pipe" % (bname, )
-    apipe = makepipecomponent(idf, pname)
+    pname = "%s_pipe" % (branchname, )
+    pipe = pipecomponent(idf, pname)
     # now make the branch with the pipe in it
-    abranch = idf.newidfobject("BRANCH", bname)
-    abranch.Component_1_Object_Type = 'Pipe:Adiabatic'
-    abranch.Component_1_Name = pname
-    abranch.Component_1_Inlet_Node_Name = apipe.Inlet_Node_Name
-    abranch.Component_1_Outlet_Node_Name = apipe.Outlet_Node_Name
-    abranch.Component_1_Branch_Control_Type = "Bypass"
-    return abranch
+    branch = idf.newidfobject("BRANCH", branchname)
+    branch.Component_1_Object_Type = 'Pipe:Adiabatic'
+    branch.Component_1_Name = pname
+    branch.Component_1_Inlet_Node_Name = pipe.Inlet_Node_Name
+    branch.Component_1_Outlet_Node_Name = pipe.Outlet_Node_Name
+    branch.Component_1_Branch_Control_Type = "Bypass"
+    return branch
 
 
-def makeductbranch(idf, bname):
+def pipecomponent(idf, pname):
+    """make a pipe component
+    generate inlet outlet names"""
+    pipe = idf.newidfobject("Pipe:Adiabatic".upper(), pname)
+    pipe.Inlet_Node_Name = "%s_inlet" % (pname, )
+    pipe.Outlet_Node_Name = "%s_outlet" % (pname, )
+    return pipe
+
+
+def ductbranch(idf, bname):
     """make a branch with a duct
     use standard inlet outlet names"""
     # make the duct component first
     pname = "%s_duct" % (bname, )
-    aduct = makeductcomponent(idf, pname)
+    duct = ductcomponent(idf, pname)
     # now make the branch with the duct in it
-    abranch = idf.newidfobject("BRANCH", bname)
-    abranch.Component_1_Object_Type = 'duct'
-    abranch.Component_1_Name = pname
-    abranch.Component_1_Inlet_Node_Name = aduct.Inlet_Node_Name
-    abranch.Component_1_Outlet_Node_Name = aduct.Outlet_Node_Name
-    abranch.Component_1_Branch_Control_Type = "Bypass"
-    return abranch
+    branch = idf.newidfobject("BRANCH", bname)
+    branch.Component_1_Object_Type = 'duct'
+    branch.Component_1_Name = pname
+    branch.Component_1_Inlet_Node_Name = duct.Inlet_Node_Name
+    branch.Component_1_Outlet_Node_Name = duct.Outlet_Node_Name
+    branch.Component_1_Branch_Control_Type = "Bypass"
+    return branch
+
+
+def ductcomponent(idf, dname):
+    """make a duct component
+    generate inlet outlet names"""
+    duct = idf.newidfobject("duct".upper(), dname)
+    duct.Inlet_Node_Name = "%s_inlet" % (dname, )
+    duct.Outlet_Node_Name = "%s_outlet" % (dname, )
+    return duct
 
 
 def getbranchcomponents(idf, branch, utest=False):
@@ -315,15 +470,9 @@ def doingtesting(testing, testn, result=None):
     testn += 1
     if testing == testn:
         print(testing)
-        returnnone()
+        return
     else:
         return testn
-
-
-def returnnone():
-    """return None"""
-    # TODO: Why do we need this? It's just syntactic sugar for `return None`!
-    return None
 
 
 def simplify_names(fields):
@@ -349,35 +498,12 @@ def simplify_names(fields):
     return fields
 
 
-def makeplantloop(idf, loopname, sloop, dloop):
-    """Make plant loop with pipe components"""
-    newloop = idf.newidfobject("PLANTLOOP", loopname)
-    newloop = makeloop(idf, newloop, sloop, dloop)
-    return newloop
-
-
-def makecondenserloop(idf, loopname, sloop, dloop):
-    """Make loop with pipe components"""
-    newloop = idf.newidfobject("CONDENSERLOOP", loopname)
-    newloop = makeloop(idf, newloop, sloop, dloop)
-    return newloop
-
-
-def makeairloop(idf, loopname, sloop, dloop):
-    """make an airloop"""
-    # TODO: unit test
-    newloop = idf.newidfobject("AIRLOOPHVAC", loopname)
-    newloop = makeloop(idf, newloop, sloop, dloop)
-
-    return newloop
-
-
 def make_air_demand_loop(idf, dloop):
     """Make the demand side of an air loop
     """
-    # TODO: unit test
+    _inlet, zones, _outlet = dloop
     #ZoneHVAC:EquipmentConnections
-    for zone in dloop:
+    for zone in zones:
         equipconn = idf.newidfobject("ZoneHVAC:EquipmentConnections".upper())
         equipconn.Zone_Name = zone
         fldname = "Zone_Conditioning_Equipment_List_Name"
@@ -390,7 +516,7 @@ def make_air_demand_loop(idf, dloop):
         equipconn[fldname] = "%s Outlet Node" % (zone, )
     
     # make ZoneHVAC:EquipmentList
-    for zone in dloop:
+    for zone in zones:
         z_equiplst = idf.newidfobject("ZoneHVAC:EquipmentList".upper())
         z_equipconn = modeleditor.getobjects(idf.idfobjects, idf.model, idf.idd_info, "ZoneHVAC:EquipmentConnections".upper(), #places=7,
             **dict(Zone_Name=zone))[0]
@@ -402,7 +528,7 @@ def make_air_demand_loop(idf, dloop):
         z_equiplst.Zone_Equipment_1_Heating_or_NoLoad_Sequence = 1
     
     # make AirTerminal:SingleDuct:Uncontrolled
-    for zone in dloop:
+    for zone in zones:
         z_equipconn = modeleditor.getobjects(
             idf.idfobjects, idf.model, idf.idd_info, 
             "ZoneHVAC:EquipmentConnections".upper(), #places=7,
@@ -419,12 +545,12 @@ def make_air_demand_loop(idf, dloop):
 def make_air_splitters_mixers_and_paths(idf, loopname, dloop, newloop):
     """Make splitters and mixers and supply and return paths for an air loop.
     """
-    # TODO: unit test
+    _inlet, zones, _outlet = dloop
     # make AirLoopHVAC:ZoneSplitter
     z_splitter = idf.newidfobject("AIRLOOPHVAC:ZONESPLITTER")
     z_splitter.Name = "%s Demand Side Splitter" % (loopname, )
     z_splitter.Inlet_Node_Name = newloop.Demand_Side_Inlet_Node_Names
-    for i, zone in enumerate(dloop):
+    for i, zone in enumerate(zones):
         z_equipconn = modeleditor.getobjects(
             idf.idfobjects, idf.model, idf.idd_info, 
             "ZoneHVAC:EquipmentConnections".upper(),
@@ -436,7 +562,7 @@ def make_air_splitters_mixers_and_paths(idf, loopname, dloop, newloop):
     z_mixer = idf.newidfobject("AIRLOOPHVAC:ZONEMIXER")
     z_mixer.Name = "%s Demand Side Mixer" % (loopname, )
     z_mixer.Outlet_Node_Name = newloop.Demand_Side_Outlet_Node_Name
-    for i, zone in enumerate(dloop):
+    for i, zone in enumerate(zones):
         z_equipconn = modeleditor.getobjects(
             idf.idfobjects, idf.model, idf.idd_info, 
             "ZoneHVAC:EquipmentConnections".upper(), #places=7,
@@ -463,84 +589,6 @@ def make_air_splitters_mixers_and_paths(idf, loopname, dloop, newloop):
     z_returnpth.Component_1_Name = z_mixer.Name
     
     
-def makeloop(idf, newloop, sloop, dloop):
-    """Make an air loop, condenser loop or plant loop.
-    """
-    fields = somefields[newloop.key]
-
-    initialise_loop(newloop, fields)
-
-    d_branches, s_branches = make_branches(idf, newloop, sloop, dloop)
-    
-    if newloop.key == 'AIRLOOPHVAC':
-        # TODO: unit test
-        make_air_demand_loop(idf, dloop)
-        make_air_splitters_mixers_and_paths(idf, newloop.Name, dloop, newloop)
-    else:
-        rename_endpoints(idf, newloop, d_branches, s_branches)
-
-    s_connlist, d_connlist = make_connectorlists(idf, newloop.Name, newloop)
-    make_splitters_and_mixers(idf, sloop, dloop, s_connlist, d_connlist)
-
-    return newloop
-
-
-def initialise_loop(newloop, fields):
-    # for use in bunch
-    flnames = [makefieldname(f) for f in fields]
-    # simplify naming
-    fields = simplify_names(fields)
-    # make fieldnames in the loop
-    fieldnames = ['%s %s' % (newloop.Name, field) for field in fields]
-    for fieldname, thefield in zip(fieldnames, flnames):
-        newloop[thefield] = fieldname
-
-
-def make_branches(idf, newloop, sloop, dloop):
-    """Make the branch lists for this loop
-    """
-    if newloop.key == 'CONDENSERLOOP':
-        supply_branchlist = idf.newidfobject(
-            "BRANCHLIST", 
-            newloop.Condenser_Side_Branch_List_Name)
-        demand_branchlist = idf.newidfobject(
-            "BRANCHLIST", 
-            newloop.Condenser_Demand_Side_Branch_List_Name)
-    elif newloop.key == 'PLANTLOOP':
-        supply_branchlist = idf.newidfobject(
-            "BRANCHLIST", 
-            newloop.Plant_Side_Branch_List_Name)
-        demand_branchlist = idf.newidfobject(
-            "BRANCHLIST", 
-            newloop.Demand_Side_Branch_List_Name)
-    elif newloop.key == 'AIRLOOPHVAC':
-        # TODO: unit test
-        supply_branchlist = idf.newidfobject(
-            "BRANCHLIST", 
-            newloop.Branch_List_Name)
-        
-    # add supply branch names to the branchlist
-    supply_branchnames = flattencopy(sloop)
-    for branchname in supply_branchnames:
-        supply_branchlist.obj.append(branchname)
-    # make a pipe branch for all supply branches in the loop
-    supply_branches = []
-    for branch_name in supply_branchnames:
-        branch = makepipebranch(idf, branch_name)
-        supply_branches.append(branch)
-    
-    if newloop.key == 'AIRLOOPHVAC':
-        # TODO: unit test
-        demand_branchnames = []
-    else:
-        # add demand branch names to the branchlist
-        demand_branchnames = flattencopy(dloop)
-        for branchname in demand_branchnames:
-            demand_branchlist.obj.append(branchname)
-    
-    return demand_branchnames, supply_branches
-
-
 def rename_endpoints(idf, newloop, demand_branchnames, supply_branches):
     """Rename inlet outlet of endpoints of loop
     """
@@ -562,10 +610,7 @@ def rename_endpoints(idf, newloop, demand_branchnames, supply_branches):
     apipe = idf.getobject('Pipe:Adiabatic'.upper(), pipe_name) # get pipe
     apipe.Outlet_Node_Name = newloop[sameoutnode]
     # demand side
-    demand_branches = []
-    for branch_name in demand_branchnames:
-        branch = makepipebranch(idf, branch_name)
-        demand_branches.append(branch)
+    demand_branches = [pipebranch(idf, branch) for branch in demand_branchnames]
     
     # rename inlet outlet of endpoints of loop - rename in branch
     anode = "Component_1_Inlet_Node_Name"
@@ -685,19 +730,16 @@ def _clean_listofcomponents(listofcomponents):
 
 def _clean_listofcomponents_tuples(listofcomponents_tuples):
     """force 3 items in the tuple"""
-    def to3tuple(item):
-        """return a 3 item tuple"""
-        if len(item) == 3:
-            return item
-        else:
-            return (item[0], item[1], None)
-    return [to3tuple(item) for item in listofcomponents_tuples]
+    def pad(item, n):
+        """return a n-item tuple"""
+        return item + (None, ) * (n - len(item))
+    return [pad(item, 3) for item in listofcomponents_tuples]
 
 
 def getmakeidfobject(idf, key, name):
     """get idfobject or make it if it does not exist"""
     # TODO: unit test
-    # This is not used here but is a very useful function.
+    # I often write something like this and didn't know it was already here.
     # Perhaps move to modeleditor.IDF()?
     idfobject = idf.getobject(key, name)
     if not idfobject:
@@ -709,7 +751,7 @@ def getmakeidfobject(idf, key, name):
 def replacebranch1(idf, loop, branchname, listofcomponents_tuples, fluid=None,
                    debugsave=False):
     """do I even use this ? .... yup! I do"""
-    # TODO: Unit test if still used
+    # TODO: Unit test
     if fluid is None:
         fluid = ''
     listofcomponents_tuples = _clean_listofcomponents_tuples(listofcomponents_tuples)
@@ -730,8 +772,8 @@ def replacebranch(idf, loop, branch,
     """It will replace the components in the branch with components in
     listofcomponents"""
     if fluid is None:
-        fluid = ''  # never hit in unit tests
-
+        # TODO: Unit test
+        fluid = ''
     # join them into a branch
     # -----------------------
     # np1_inlet -> np1 -> np1_np2_node -> np2 -> np2_outlet
@@ -748,7 +790,7 @@ def replacebranch(idf, loop, branch,
     #===========================================================================
 #        idf.savecopy("hhh3.idf")
 
-    fields = somefields[loop.key]
+    fields = loopfields[loop.key]
 
     thebranch = branch
     componentsintobranch(idf, thebranch, listofcomponents, fluid=fluid)
@@ -768,7 +810,7 @@ def replacebranch(idf, loop, branch,
 #        idf.savecopy("hhh7.idf")
 
     # check for the end nodes of the loop
-    fields = somefields[loop.key]
+    fields = loopfields[loop.key]
     # for use in bunch
     flnames = [field.replace(' ', '_') for field in fields]
 
@@ -829,7 +871,8 @@ def replacebranch(idf, loop, branch,
             except bunch_subclass.BadEPFieldError:
                 break
             if ctype.strip() == '':
-                break  # this is never hit in unit tests
+                # TODO: Unit test
+                break
             fieldname = 'Connector_%s_Name' % (i, )
             cname = demandconlist[fieldname]
             connector = idf.getobject(ctype.upper(), cname)
@@ -878,3 +921,24 @@ def replacebranch(idf, loop, branch,
     #===========================================================================
 #        idf.savecopy("hhh9.idf")
     return thebranch
+
+
+def flattencopy(lst):
+    """flatten and return a copy of the list
+    inefficient on large lists"""
+    # modified from
+    # http://stackoverflow.com/questions/2158395/flatten-an-irregular-list-of-lists-in-python
+    thelist = copy.deepcopy(lst)
+    list_is_nested = True
+    while list_is_nested:                 #outer loop
+        keepchecking = False
+        atemp = []
+        for element in thelist:         #inner loop
+            if isinstance(element, list):
+                atemp.extend(element)
+                keepchecking = True
+            else:
+                atemp.append(element)
+        list_is_nested = keepchecking     #determine if outer loop exits
+        thelist = atemp[:]
+    return thelist

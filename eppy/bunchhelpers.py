@@ -13,16 +13,18 @@ from __future__ import unicode_literals
 
 from string import ascii_letters, digits
 
+def sanitizefieldname(namefromidd):
+    """made a field name that can be used by bunch"""
+    newname = onlylegalchar(namefromidd)
+    bunchname = newname.replace(' ', '_')
+    return bunchname
+
+
 def onlylegalchar(name):
     """return only legal chars"""
     legalchar = ascii_letters + digits + ' '
     return ''.join([s for s in name[:] if s in legalchar])
 
-def makefieldname(namefromidd):
-    """made a field name that can be used by bunch"""
-    newname = onlylegalchar(namefromidd)
-    bunchname = newname.replace(' ', '_')
-    return bunchname
 
 def matchfieldnames(field_a, field_b):
     """Check match between two strings, ignoring case and spaces/underscores.

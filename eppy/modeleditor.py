@@ -849,7 +849,7 @@ class IDF(object):
         """Print the IDF.
         """
         print(self.idfstr())
-
+    
     def idfstr(self):
         """String representation of the IDF.
 
