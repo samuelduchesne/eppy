@@ -93,28 +93,13 @@ class Branch(EppyHVAC):
     def __len__(self):
         return len(self.components)
     
+
     def set_components(self):
         branch = self.idf.newidfobject("BRANCH", self.name)
         
         for i, component in enumerate(self.components, 1):
             # get/set the inlet and outlet node names
-            # first one is the c1 inlet
-            if component.inlet == '':
-                if i == 1:
-                    inlet_name = '%s_inlet' % component.Name
-                else:
-                    inlet_name = '%s_%s_inlet' % (
-                    self.components[i-2].Name, self.components[i-1].Name)
-                component.set_inlet(inlet_name)
-
-            # last one is the cn outlet
-            if component.outlet == '':
-                if i == len(self):
-                    outlet_name = '%s_outlet' % component.Name
-                else:
-                    outlet_name = '%s_%s_outlet' % (
-                        self.components[i-1].Name, self.components[i].Name)
-                component.set_outlet(outlet_name)
+            self.set_inlet_outlet_names(i, component)
             # intermediate ones are named as c1_c2_inlet and c1_c2_outlet
             branch['Component_%i_Object_Type' % i] = component.key
             branch['Component_%i_Name' % i] = component.Name
@@ -124,6 +109,35 @@ class Branch(EppyHVAC):
     
         self.bunch = branch
 
+    def set_inlet_outlet_names(self, i, component):
+        """Set the names of inlets and outlets on a branch.
+        
+        Only if they are not already set.
+        
+        Paramaters
+        ----------
+        i : int
+            Component number on branch.
+        component : Component object
+            The component to set node names for.
+        
+        """
+        # first one is the c1 inlet
+        if component.inlet == '':
+            if i == 1:
+                inlet_name = '%s_inlet' % component.Name
+            else:
+                inlet_name = '%s_%s_inlet' % (
+                    self.components[i - 2].Name, self.components[i - 1].Name)
+            component.set_inlet(inlet_name)
+            # last one is the cn outlet
+        if component.outlet == '':
+            if i == len(self):
+                outlet_name = '%s_outlet' % component.Name
+            else:
+                outlet_name = '%s_%s_outlet' % (
+                    self.components[i - 1].Name, self.components[i].Name)
+            component.set_outlet(outlet_name)
 
 
 class Connector(object):
