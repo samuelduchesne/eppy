@@ -6,23 +6,26 @@
 #  http://opensource.org/licenses/MIT)
 # =======================================================================
 """py.test for hvacbuilder"""
-# idd is read only once in this test
-# if it has already been read from some other test, it will continue with the old reading
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from eppy.bunch_subclass import EpBunch
 from eppy.hvacbuilder import getfieldnamesendswith
+from eppy.hvacbuilder import initialise_loop
+from eppy.hvacbuilder import loopfields
 from eppy.iddcurrent import iddcurrent
 from eppy.modeleditor import IDF
 from six import StringIO
+from six import string_types
 
 
 iddfhandle = StringIO(iddcurrent.iddtxt)
 if IDF.getiddname() == None:
     IDF.setiddname(iddfhandle)
+
 
 class EppyHVAC(object):
     
@@ -43,32 +46,128 @@ class Loop(EppyHVAC):
 
     """
     
-    def __init__(self, idf):
+    def __init__(self, idf, name, sloop, dloop):
+        self.idf = idf
+        self.name = name
+        self.supply = initialise_components(idf, sloop)
+        self.demand = initialise_components(idf, dloop)
+        self.bunch = idf.newidfobject(self.objecttype, name)
+        fields = loopfields[self.objecttype]
+        initialise_loop(self.bunch, fields)
+        self.set_supply_side()
+        self.set_demand_side()
+    
+    def set_supply_side(self):
+        self.supply_side = HalfLoop(self.idf, self.bunch, self.supply, 'supply')
+    
+    def set_demand_side(self):
+        if self.key == 'AIRLOOPHVAC':
+            return
+        self.demand_side = HalfLoop(self.idf, self.bunch, self.demand, 'demand')
+
+    def replace_branch(self, name, components):
+        self.components = components
+        new_branch = Branch(self.idf, name, components)
+    
+    def replace_component(self, old_component, new_component):
         pass
     
-    def supply_side(self):
-        pass
     
-    def demand_side(self):
-        pass
+def initialise_components(idf, loop, components=None):
+    if not components:
+        components = []
+    for item in loop:
+        if isinstance(item, EpBunch):
+            components.append(Component(idf, bunch=item))
+        elif isinstance(item, string_types):
+            components.append(pipecomponent(idf, item))
+        else:
+            components = initialise_components(idf, item, components)
+    return components
+                
+                    
+class PlantLoop(Loop):
+    
+    objecttype = 'PLANTLOOP'
+
+
+class CondenserLoop(Loop):
+    
+    objecttype = 'CONDENSERLOOP'
+
+
+class AirLoop(Loop):
+
+    fluid = 'air'
+    objecttype = 'AIRLOOPHVAC'
 
 
 class HalfLoop(EppyHVAC):
     """A half-loop is either the demand or supply side of a loop.
     """
     
-    def __init__(self, idf):
-        pass
+    def __init__(self, idf, loop, components, side):
+        self.idf = idf
+        self.loop = loop
+        self.components = components
+        self.side = side
+        self.set_branchlist()
+        self.set_connectorlist()
+        self.set_splitter()
+        self.set_mixer()
     
-    def branches(self):
-        """A list of branches on the half loop.
-        """
-        pass
+    def set_branchlist(self):
+        if self.loop.key == 'AIRLOOPHVAC':            
+            if self.side == 'supply':
+                branchlist = self.idf.getmakeidfobject(
+                    "BRANCHLIST", self.loop.fieldvalues[5])                
+        elif self.loop.key in ['PLANTLOOP', 'CONDENSERLOOP']:
+            if self.side == 'supply':
+                branchlist = self.idf.getmakeidfobject(
+                    "BRANCHLIST", self.loop.fieldvalues[13])    
+            elif self.side == 'demand':
+                branchlist = self.idf.getmakeidfobject(
+                    "BRANCHLIST", self.loop.fieldvalues[17])
+        for component in self.components:
+            branchlist.obj.append(component.Name)
+        self.branchlist = branchlist
     
-    def connectors(self):
+    def set_connectorlist(self):
         """A list of connectors on the half loop.
         """
-        pass
+        if self.loop.key == 'AIRLOOPHVAC':
+            if self.side == 'supply':
+                connectorlist = self.idf.getmakeidfobject(
+                    "CONNECTORLIST", self.loop.fieldvalues[6])
+        elif self.loop.key in ['PLANTLOOP', 'CONDENSERLOOP']:
+            if self.side == 'supply':
+                connectorlist = self.idf.getmakeidfobject(
+                    "CONNECTORLIST", self.loop.fieldvalues[8])
+            if self.side == 'demand':
+                connectorlist = self.idf.getmakeidfobject(
+                    "CONNECTORLIST", self.loop.fieldvalues[12])
+        connectorlist.Connector_1_Object_Type = "Connector:Splitter"
+        connectorlist.Connector_1_Name = "%s_supply_splitter" % self.loop.Name
+        connectorlist.Connector_2_Object_Type = "Connector:Mixer"
+        connectorlist.Connector_2_Name = "%s_supply_mixer" % self.loop.Name
+        
+        self.connectorlist = connectorlist
+
+    def set_splitter(self):
+        splitter = self.idf.newidfobject(
+            "CONNECTOR:SPLITTER", 
+            self.connectorlist.Connector_1_Name)
+        splitter.Inlet_Branch_Name = self.components[0].Name
+        splitter.obj.extend(c.Name for c in self.components[1:-1])
+        self.splitter = splitter
+        
+    def set_mixer(self):
+        mixer = self.idf.newidfobject(
+            "CONNECTOR:MIXER", 
+            self.connectorlist.Connector_2_Name)
+        mixer.Outlet_Branch_Name = self.components[-1].Name
+        mixer.obj.extend(c.Name for c in self.components[1:-1])
+        self.mixer = mixer
 
 
 class Branch(EppyHVAC):
@@ -140,7 +239,7 @@ class Branch(EppyHVAC):
             component.set_outlet(outlet_name)
 
 
-class Connector(object):
+class Connector(EppyHVAC):
     """Connectors (splitters or mixers) join branches together.
     """
     def __init__(self, idf):
@@ -191,6 +290,9 @@ class Component(EppyHVAC):
         field = getfieldnamesendswith(self.bunch, 'Outlet_Node_Name')[0]
         self.bunch[field] = name
     
+    def __repr__(self):
+        return "Component(%s, %s)" % (self.idf, self.bunch)
+    
 
 def pipecomponent(idf, pname):
     """make a pipe component
@@ -201,6 +303,39 @@ def pipecomponent(idf, pname):
         Outlet_Node_Name="%s_outlet" % pname)
     return pipe
 
+
+def makeairloop(idf, name, sloop, dloop):
+    return AirLoop(idf, name, sloop, dloop)
+
+
+def makeplantloop(idf, name, sloop, dloop):
+    return PlantLoop(idf, name, sloop, dloop)
+
+
+def test_makeairloop():
+    """pytest for makeairloop"""
+    tdata = (
+        "Air Loop",
+        ['sb0', ['sb1', 'sb2', 'sb3'], 'sb4'],
+        ['db0', ['z1', 'z2', 'z3'], 'db4'],
+        """AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db1DirectAir, , db1 Inlet Node, autosize;  ZONEHVAC:EQUIPMENTLIST, db1 equip list, AirTerminal:SingleDuct:Uncontrolled, db1DirectAir, 1, 1;  ZONEHVAC:EQUIPMENTCONNECTIONS, db1, db1 equip list, db1 Inlet Node, , db1 Node, db1 Outlet Node;  AIRLOOPHVAC, p_loop, , , 0, p_loop Branchs, p_loop Connectors, p_loop Supply Side Inlet, p_loop Demand Outlet, p_loop Demand Inlet, p_loop Supply Side Outlet;  AIRLOOPHVAC:ZONESPLITTER, p_loop Demand Side Splitter, p_loop Demand Inlet, db1 Inlet Node;  AIRLOOPHVAC:SUPPLYPATH, p_loopSupplyPath, p_loop Demand Inlet, AirLoopHVAC:ZoneSplitter, p_loop Demand Side Splitter;  AIRLOOPHVAC:ZONEMIXER, p_loop Demand Side Mixer, p_loop Demand Outlet, db1 Outlet Node;  AIRLOOPHVAC:RETURNPATH, p_loopReturnPath, p_loop Demand Outlet, AirLoopHVAC:ZoneMixer, p_loop Demand Side Mixer;  BRANCH, sb0, 0, , Pipe:Adiabatic, sb0_pipe, sb0_pipe_inlet, sb0_pipe_outlet, Bypass;  BRANCH, sb1, 0, , Pipe:Adiabatic, sb1_pipe, sb1_pipe_inlet, sb1_pipe_outlet, Bypass;  BRANCH, sb2, 0, , Pipe:Adiabatic, sb2_pipe, sb2_pipe_inlet, sb2_pipe_outlet, Bypass;  BRANCH, sb3, 0, , Pipe:Adiabatic, sb3_pipe, sb3_pipe_inlet, sb3_pipe_outlet, Bypass;  BRANCH, sb4, 0, , Pipe:Adiabatic, sb4_pipe, sb4_pipe_inlet, sb4_pipe_outlet, Bypass;  BRANCHLIST, p_loop Branchs, sb0, sb1, sb2, sb3, sb4;  CONNECTOR:SPLITTER, p_loop_supply_splitter, sb0, sb1, sb2, sb3;  CONNECTOR:MIXER, p_loop_supply_mixer, sb4, sb1, sb2, sb3;  CONNECTORLIST, p_loop Connectors, Connector:Splitter, p_loop_supply_splitter, Connector:Mixer, p_loop_supply_mixer;  PIPE:ADIABATIC, sb0_pipe, sb0_pipe_inlet, sb0_pipe_outlet;  PIPE:ADIABATIC, sb1_pipe, sb1_pipe_inlet, sb1_pipe_outlet;  PIPE:ADIABATIC, sb2_pipe, sb2_pipe_inlet, sb2_pipe_outlet;  PIPE:ADIABATIC, sb3_pipe, sb3_pipe_inlet, sb3_pipe_outlet;  PIPE:ADIABATIC, sb4_pipe, sb4_pipe_inlet, sb4_pipe_outlet;  
+"""
+    ) # loopname, sloop, dloop, expected
+
+    loopname, sloop, dloop, expected = tdata
+    fhandle = StringIO("")
+    idf1 = IDF(fhandle)
+    loop = makeairloop(idf1, loopname, sloop, dloop)
+    idf1.printidf()
+    #===========================================================================
+    # idf2 = IDF(StringIO(expected))
+    # idf2.outputtype = 'compressed'
+    # idf2.printidf()
+    # result = idf1.idfstr()
+    # expected = idf2.idfstr()
+    # assert result == expected
+    #===========================================================================
+    
 
 def test_branch_no_components():
     idf = IDF()
@@ -244,5 +379,15 @@ def test_branch_two_components():
     print(branch.components[0])
     print(branch)
 
-
+def test_plantloop_with_components():
+    idf = IDF()
+    idf.new()
+    boiler1 = idf.newidfobject('BOILER:HOTWATER', 'boiler1')
+    boiler2 = idf.newidfobject('BOILER:HOTWATER', 'boiler2')
+    sloop = ['s1', [boiler1, boiler2], 's2'] 
+    baseboard = idf.newidfobject(
+        'ZONEHVAC:BASEBOARD:CONVECTIVE:WATER', 'baseboard')
+    dloop = ['d1', [baseboard], 'd2'] 
+    loop = makeplantloop(idf, 'Plant Loop', sloop, dloop)
+    idf.printidf()
     

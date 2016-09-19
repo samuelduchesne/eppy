@@ -490,9 +490,19 @@ def zonevolume(idf, zonename):
 
     return volume
 
+
 def refname2key(idf, refname):
     """return all keys that have the reference name"""
     return [item[0] for item in getallobjlists(idf, refname)]
+
+
+def getmakeidfobject(idf, key, name, *args, **kwargs):
+    """get idfobject or make it if it does not exist"""
+    idfobject = idf.getobject(key, name)
+    if not idfobject:
+        return idf.newidfobject(key, name, *args, **kwargs)
+    else:
+        return idfobject
 
 
 class IDF(object):
@@ -738,6 +748,23 @@ class IDF(object):
             abunch[k] = v
         return abunch
 
+    def getmakeidfobject(self, key, name, *args, **kwargs):
+        """Try to get an IDF object by key and name, otherwise create it.
+        
+        Parameters
+        ----------
+        key : str
+            The IDF object type.
+        name : str
+            The name of the IDF object.
+        
+        Returns
+        -------
+        EpBunch object.
+        
+        """
+        return getmakeidfobject(self, key, name, *args, **kwargs)
+        
     def popidfobject(self, key, index):
         """Pop an IDF object from the IDF.
 
