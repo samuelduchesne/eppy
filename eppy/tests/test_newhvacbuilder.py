@@ -21,10 +21,83 @@ from eppy.modeleditor import IDF
 from six import StringIO
 from six import string_types
 
+import modeleditor
+
 
 iddfhandle = StringIO(iddcurrent.iddtxt)
 if IDF.getiddname() == None:
     IDF.setiddname(iddfhandle)
+
+
+def makeairloop(idf, name, sloop, dloop):
+    """Make an airloop with pipe components.
+    Parameters
+    ----------
+    idf : IDF object
+        The IDF.
+    loopname : str
+        Name for the loop.
+    sloop : list
+        A list of names for each branch on the supply loop.
+        Example: ['s_inlet', ['oa sys'], 's_outlet]
+    dloop : list
+        A list of names for each branch on the loop.
+        Example: ['d_inlet', ['zone1', 'zone2'], 'd_outlet]
+    
+    Returns
+    -------
+    EPBunch
+
+    """
+    return AirLoop(idf, name, sloop, dloop)
+
+
+def makeplantloop(idf, name, sloop, dloop):
+    """Make plant loop with pipe components.
+    
+    Parameters
+    ----------
+    idf : IDF object
+        The IDF.
+    loopname : str
+        Name for the loop.
+    sloop : list
+        A list of names for each branch on the supply loop.
+        Example: ['s_inlet', ['boiler', 'bypass'], 's_outlet]
+    dloop : list
+        A list of names for each branch on the loop.
+        Example: ['d_inlet', ['zone1', 'zone2'], 'd_outlet]
+    
+    Returns
+    -------
+    EPBunch
+
+    """
+    return PlantLoop(idf, name, sloop, dloop)
+
+
+def makecondenserloop(idf, name, sloop, dloop):
+    """Make loop with pipe components
+
+    Parameters
+    ----------
+    idf : IDF object
+        The IDF.
+    loopname : str
+        Name for the loop.
+    sloop : list
+        A list of names for each branch on the supply loop.
+        Example: ['s_inlet', ['tower', 'supply bypass'], 's_outlet]
+    dloop : list
+        A list of names for each branch on the loop.
+        Example: ['d_inlet', ['chiller condenser', 'demand bypass'], 'd_outlet]
+    
+    Returns
+    -------
+    EPBunch
+
+    """
+    return CondenserLoop(idf, name, sloop, dloop)
 
 
 class EppyHVAC(object):
@@ -61,8 +134,6 @@ class Loop(EppyHVAC):
         self.supply_side = HalfLoop(self.idf, self.bunch, self.supply, 'supply')
     
     def set_demand_side(self):
-        if self.key == 'AIRLOOPHVAC':
-            return
         self.demand_side = HalfLoop(self.idf, self.bunch, self.demand, 'demand')
 
     def replace_branch(self, name, components):
@@ -98,9 +169,60 @@ class CondenserLoop(Loop):
 
 class AirLoop(Loop):
 
-    fluid = 'air'
     objecttype = 'AIRLOOPHVAC'
-
+    
+    def set_demand_side(self):
+        """Set the demand side of an air loop.
+        
+        The demand side of an air loop is very different to that of a plant or
+        condenser loop.
+        
+        """
+        idf = self.idf
+        zones = self.demand[1:-1]
+        #ZoneHVAC:EquipmentConnections
+        for zone in zones:
+            equipconn = idf.newidfobject("ZONEHVAC:EQUIPMENTCONNECTIONS")
+            equipconn.Zone_Name = zone.Name
+            fldname = "Zone_Conditioning_Equipment_List_Name"
+            equipconn[fldname] = "%s equip list" % (zone.Name, )
+            fldname = "Zone_Air_Inlet_Node_or_NodeList_Name"
+            equipconn[fldname] = "%s Inlet Node" % (zone.Name, )
+            fldname = "Zone_Air_Node_Name"
+            equipconn[fldname] = "%s Node" % (zone.Name, )
+            fldname = "Zone_Return_Air_Node_Name"
+            equipconn[fldname] = "%s Outlet Node" % (zone.Name, )
+        
+        # make ZoneHVAC:EquipmentList
+        for zone in zones:
+            z_equiplst = idf.newidfobject("ZONEHVAC:EQUIPMENTLIST")
+            z_equipconn = modeleditor.getobjects(
+                idf.idfobjects, idf.model, idf.idd_info,
+                "ZONEHVAC:EQUIPMENTCONNECTIONS",
+                **dict(Zone_Name=zone.Name))[0]
+            z_equiplst.Name = z_equipconn.Zone_Conditioning_Equipment_List_Name
+            fld = "Zone_Equipment_1_Object_Type"
+            z_equiplst[fld] = "AirTerminal:SingleDuct:Uncontrolled"
+            z_equiplst.Zone_Equipment_1_Name = "%sDirectAir" % (zone.Name, )
+            z_equiplst.Zone_Equipment_1_Cooling_Sequence = 1
+            z_equiplst.Zone_Equipment_1_Heating_or_NoLoad_Sequence = 1
+        
+        # make AirTerminal:SingleDuct:Uncontrolled
+        for zone in zones:
+            z_equipconn = modeleditor.getobjects(
+                idf.idfobjects, idf.model, idf.idd_info, 
+                "ZONEHVAC:EQUIPMENTCONNECTIONS",
+                **dict(Zone_Name=zone.Name))[0]
+            key = "AIRTERMINAL:SINGLEDUCT:UNCONTROLLED"
+            z_airterm = idf.newidfobject(key)
+            z_airterm.Name = "%sDirectAir" % (zone.Name, )
+            fld1 = "Zone_Supply_Air_Node_Name"
+            fld2 = "Zone_Air_Inlet_Node_or_NodeList_Name"
+            z_airterm[fld1] = z_equipconn[fld2]
+            z_airterm.Maximum_Air_Flow_Rate = 'autosize'
+            
+        self.demand_side = AirHalfLoop(
+            self.idf, self.bunch, self.demand, 'demand')
 
 class HalfLoop(EppyHVAC):
     """A half-loop is either the demand or supply side of a loop.
@@ -120,7 +242,7 @@ class HalfLoop(EppyHVAC):
         if self.loop.key == 'AIRLOOPHVAC':            
             if self.side == 'supply':
                 branchlist = self.idf.getmakeidfobject(
-                    "BRANCHLIST", self.loop.fieldvalues[5])                
+                    "BRANCHLIST", self.loop.fieldvalues[5])
         elif self.loop.key in ['PLANTLOOP', 'CONDENSERLOOP']:
             if self.side == 'supply':
                 branchlist = self.idf.getmakeidfobject(
@@ -135,17 +257,12 @@ class HalfLoop(EppyHVAC):
     def set_connectorlist(self):
         """A list of connectors on the half loop.
         """
-        if self.loop.key == 'AIRLOOPHVAC':
-            if self.side == 'supply':
-                connectorlist = self.idf.getmakeidfobject(
-                    "CONNECTORLIST", self.loop.fieldvalues[6])
-        elif self.loop.key in ['PLANTLOOP', 'CONDENSERLOOP']:
-            if self.side == 'supply':
-                connectorlist = self.idf.getmakeidfobject(
-                    "CONNECTORLIST", self.loop.fieldvalues[8])
-            if self.side == 'demand':
-                connectorlist = self.idf.getmakeidfobject(
-                    "CONNECTORLIST", self.loop.fieldvalues[12])
+        if self.side == 'supply':
+            connectorlist = self.idf.getmakeidfobject(
+                "CONNECTORLIST", self.loop.fieldvalues[8])
+        if self.side == 'demand':
+            connectorlist = self.idf.getmakeidfobject(
+                "CONNECTORLIST", self.loop.fieldvalues[12])
         connectorlist.Connector_1_Object_Type = "Connector:Splitter"
         connectorlist.Connector_1_Name = "%s_supply_splitter" % self.loop.Name
         connectorlist.Connector_2_Object_Type = "Connector:Mixer"
@@ -169,6 +286,38 @@ class HalfLoop(EppyHVAC):
         mixer.obj.extend(c.Name for c in self.components[1:-1])
         self.mixer = mixer
 
+
+class AirHalfLoop(HalfLoop):
+    
+    def set_connectorlist(self):
+        """A list of connectors on the half loop.
+        """
+        if self.side == 'supply':
+            connectorlist = self.idf.getmakeidfobject(
+                "CONNECTORLIST", self.loop.fieldvalues[6])
+        connectorlist.Connector_1_Object_Type = "Connector:Splitter"
+        connectorlist.Connector_1_Name = "%s_supply_splitter" % self.loop.Name
+        connectorlist.Connector_2_Object_Type = "Connector:Mixer"
+        connectorlist.Connector_2_Name = "%s_supply_mixer" % self.loop.Name
+        
+        self.connectorlist = connectorlist
+
+    def set_splitter(self):
+        """Make AirLoopHVAC:ZoneSplitter.
+        """
+        idf = self.idf
+        zones = self.demand[1:-1]
+        z_splitter = idf.newidfobject("AIRLOOPHVAC:ZONESPLITTER")
+        z_splitter.Name = "%s Demand Side Splitter" % self.loop.Name
+        z_splitter.Inlet_Node_Name = self.loop.Demand_Side_Inlet_Node_Names
+        for i, zone in enumerate(zones):
+            z_equipconn = modeleditor.getobjects(
+                idf.idfobjects, idf.model, idf.idd_info, 
+                "ZoneHVAC:EquipmentConnections".upper(),
+                **dict(Zone_Name=zone.Name))[0]
+            fld = "Outlet_%s_Node_Name" % (i + 1, )
+            z_splitter[fld] = z_equipconn.Zone_Air_Inlet_Node_or_NodeList_Name
+        
 
 class Branch(EppyHVAC):
     """Branches contain one or more components in series.
@@ -304,14 +453,6 @@ def pipecomponent(idf, pname):
     return pipe
 
 
-def makeairloop(idf, name, sloop, dloop):
-    return AirLoop(idf, name, sloop, dloop)
-
-
-def makeplantloop(idf, name, sloop, dloop):
-    return PlantLoop(idf, name, sloop, dloop)
-
-
 def test_makeairloop():
     """pytest for makeairloop"""
     tdata = (
@@ -390,4 +531,5 @@ def test_plantloop_with_components():
     dloop = ['d1', [baseboard], 'd2'] 
     loop = makeplantloop(idf, 'Plant Loop', sloop, dloop)
     idf.printidf()
+    idf.run()
     
