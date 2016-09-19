@@ -13,6 +13,11 @@ from __future__ import unicode_literals
 
 from string import ascii_letters, digits
 
+def makefieldname(namefromidd):
+    """made a field name that can be used by bunch"""
+    return sanitizefieldname(namefromidd)
+
+
 def sanitizefieldname(namefromidd):
     """made a field name that can be used by bunch"""
     newname = onlylegalchar(namefromidd)

@@ -70,9 +70,9 @@ def makeplantloop(idf, loopname, sloop, dloop):
     EPBunch
 
     """
-    newloop = idf.newidfobject("PLANTLOOP", loopname)
-    newloop = makeloop(idf, newloop, sloop, dloop)
-    return newloop
+    loop = PlantLoop(idf, loopname, sloop, dloop)
+    
+    return loop.makeloop()
 
 
 def makecondenserloop(idf, loopname, sloop, dloop):
@@ -127,6 +127,51 @@ def makeairloop(idf, loopname, sloop, dloop):
 
     return newloop
 
+class Loop(object):
+    
+    def __init__(self, idf, loopname, sloop, dloop):
+        self.idf = idf
+        self.sloop = sloop
+        self.dloop = dloop
+        self.newloop = idf.newidfobject(self.looptype, loopname)
+    
+    @property
+    def looptype(self):
+        return type(self).__name__.upper()
+    
+    def makeloop(self):
+        idf = self.idf
+        newloop = self.newloop
+        sloop = self.sloop
+        dloop = self.dloop
+        fields = loopfields[newloop.key]
+    
+        initialise_loop(newloop, fields)
+    
+        s_branches, d_branches = make_branches(idf, newloop, sloop, dloop)
+    
+        if newloop.key == 'AIRLOOPHVAC':
+            make_air_demand_loop(idf, dloop)
+            make_air_splitters_mixers_and_paths(idf, newloop.Name, dloop, newloop)
+        else:
+            rename_endpoints(idf, newloop, d_branches, s_branches)
+    
+        s_connlist, d_connlist = make_connectorlists(idf, newloop.Name, newloop)
+        make_splitters_and_mixers(idf, sloop, dloop, s_connlist, d_connlist)
+    
+        return newloop
+
+class AirLoopHVAC(Loop):
+    pass
+
+
+class PlantLoop(Loop):
+    
+    pass
+
+
+class CondenserLoop(Loop):
+    pass
 
 def makeloop(idf, newloop, sloop, dloop):
     """Make an air loop, condenser loop or plant loop.

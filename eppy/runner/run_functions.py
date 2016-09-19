@@ -212,5 +212,6 @@ def run(idf=None, weather=None, output_directory='', annual=False,
         os.chdir(cwd)
     except CalledProcessError:
         # potentially catch contents of std out and put it in the error
+        os.chdir(cwd)
         raise
     return 'OK'
