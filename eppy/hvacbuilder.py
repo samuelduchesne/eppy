@@ -615,6 +615,15 @@ class AirLoopHVAC(Loop):
         make supply and return path objects.
         
         """
+        supply_splitter = self.idf.newidfobject(
+            "CONNECTOR:SPLITTER", 
+            self.s_connlist.Connector_1_Name)
+        supply_splitter.obj.extend([self.sloop[0]] + self.sloop[1])
+        supply_mixer = self.idf.newidfobject(
+            "CONNECTOR:MIXER", 
+            self.s_connlist.Connector_2_Name)
+        supply_mixer.obj.extend([self.sloop[-1]] + self.sloop[1])
+    
         _inlet, zones, _outlet = self.dloop
         # make AirLoopHVAC:ZoneSplitter
         z_splitter = self.idf.newidfobject("AIRLOOPHVAC:ZONESPLITTER")
@@ -802,12 +811,14 @@ def getbranchcomponents(idf, branch, utest=False):
 def renamenodes(idf, fieldtype):
     """Rename all changed nodes.
     
+    This will be stored as a list.
+    
     Parameters
     ----------
     idf : IDF
         The IDF.
     fieldtype : str
-        TODO: What is this?
+        TODO: What is this? node
         
     """
     # get the values to be replaced
@@ -831,10 +842,9 @@ def renamenodes(idf, fieldtype):
                         if type(fieldvalue) is list:
                             fieldvalue = fieldvalue[-1]
                             idfobject.fieldvalues[i] = fieldvalue
-                        else:
-                            if fieldvalue in tempdct:
-                                fieldvalue = tempdct[fieldvalue]
-                                idfobject.fieldvalues[i] = fieldvalue
+                        elif fieldvalue in tempdct:
+                            fieldvalue = tempdct[fieldvalue]
+                            idfobject.fieldvalues[i] = fieldvalue
 
 
 def getfieldnamesendswith(idfobject, endswith):
