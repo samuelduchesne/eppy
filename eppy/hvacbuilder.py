@@ -665,6 +665,20 @@ class AirLoopHVAC(Loop):
         z_returnpth.Component_1_Object_Type = "AirLoopHVAC:ZoneMixer"
         z_returnpth.Component_1_Name = z_mixer.Name
     
+    def replacezoneequipment(self, zone, newcomponents):
+        """Replace zone equipment in a zone and update references in the IDF.
+        
+        Parameters
+        ----------
+        zone : str
+            Name of the zone.
+        newcomponents : list
+            List of EpBunch objects, or tuples like (EpBunch, node_prefix), for
+            the replacement components.
+        
+        """
+        pass
+    
     
 def pipebranch(idf, branchname):
     """Make a branch with a pipe using standard inlet and outlet names.
