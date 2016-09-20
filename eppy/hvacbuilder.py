@@ -147,7 +147,7 @@ class Loop(object):
         self.loop = self.idf.newidfobject(self.looptype, self.loopname)
         self.initialise_loopfields()
         
-        self.set_branchlists()        
+        self.make_branchlists()        
         self.make_supply_branches()
         self.make_demand_branches()
 
@@ -433,7 +433,7 @@ class PlantLoop(Loop):
     supply_inletnode = "Plant_Side_Inlet_Node_Name"
     supply_outletnode = "Plant_Side_Outlet_Node_Name"
 
-    def set_branchlists(self):
+    def make_branchlists(self):
         """Initialise BRANCHLIST objects for supply and demand side.
         """
         self.supply_branchlist = self.idf.newidfobject(
@@ -484,7 +484,7 @@ class CondenserLoop(Loop):
     supply_inletnode = "Condenser_Side_Inlet_Node_Name"
     supply_outletnode = "Condenser_Side_Outlet_Node_Name"
 
-    def set_branchlists(self):
+    def make_branchlists(self):
         """Initialise BRANCHLIST objects for supply and demand side.
         """
         self.supply_branchlist = self.idf.newidfobject(
@@ -530,7 +530,7 @@ class AirLoopHVAC(Loop):
         'Demand Side Inlet Node Names',
         'Supply Side Outlet Node Names']
     
-    def set_branchlists(self):
+    def make_branchlists(self):
         """Initialise BRANCHLIST object for supply side.
         """
         self.supply_branchlist = self.idf.newidfobject(
