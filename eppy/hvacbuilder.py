@@ -266,10 +266,11 @@ class Loop(object):
         branch : EpBunch
             The branch to be replaced.
         newcomponents : list
-            List of EpBunch objects for the replacement components.
+            List of EpBunch objects, or tuples like (EpBunch, node_prefix), for
+            the replacement components.
         fluid : str, optional
             The type of fluid used in the branch. Default is None, which
-            equates to a blank fluid field in the BRANCH object.
+            equates to an empty fluid field in the BRANCH object.
         
         Returns
         -------
