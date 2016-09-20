@@ -13,7 +13,6 @@ from __future__ import unicode_literals
 
 import os
 
-#from eppy.hvacbuilder import replacebranch
 from eppy.iddcurrent import iddcurrent
 from eppy.modeleditor import IDF
 from eppy.pytest_helpers import IDD_FILES
@@ -30,8 +29,56 @@ if IDF.getiddname() == None:
     IDF.setiddname(iddfhandle)
 
 
+def test_makeVAVSingleDuctReheat():
+    """pytest to try and make a specific system.
+    """
+    idf = IDF()
+    idf.new('myVAVSingleDuctReheat.idf')
+    # Air Loop Main Branch
+    loopname = 'Air Loop'
+    sloop = ['fan',
+                ['detailed cooling coil'],
+             'airloop_out']
+    dloop = ['z_in', 
+                ['Zone 1', 'Zone 2', 'Zone 3'],
+             'z_out']
+    loop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
+
+    # Cold water loop
+    loopname = 'CW'
+    sloop = ['circ pump',
+             ['big chiller', 'little chiller', 'purchased cooling', 'cws bypass'],
+             'cw supply outlet']
+    dloop = ['cw demand inlet',
+             ['cwd bypass', 'detailed cooling coil'],
+             'cw demand outlet']
+    loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
+    
+    branch = idf.getobject('BRANCH', 'detailed cooling coil')
+    coil = idf.getmakeidfobject(
+        'COIL:COOLING:WATER:DETAILEDGEOMETRY', 'detailed cooling coil')
+    loop.replacebranch(branch, [coil], 'WATER')
+#    loop.replacebranch(branch, [coil], 'AIR')
+
+    # Condenser loop
+    loopname = 'Condenser'
+    sloop = ['cond circ pump',
+             ['big tower', 'cond s bypass'],
+             'cond supply outlet']
+    dloop = ['cond demand inlet',
+             ['big chiller', 'little chiller', 'cond d bypass'],
+             'cond demand outlet']
+    loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
+    
+
+    idf.save()
+    idd = os.path.join(IDD_FILES,'Energy+V8_1_0.idd')
+    diagram = LoopDiagram('myVAVSingleDuctReheat.idf', idd)
+    diagram.save()
+
+
 def test_make5ZoneAutoDXVAV():
-    """pytest to try and make a specific air loop.
+    """pytest to try and make a specific system.
     """
     loopname = 'VAV Sys 1'
     sloop = ['s_in', ['DX Cooling Coil System 1'], 's_out']
@@ -43,11 +90,13 @@ def test_make5ZoneAutoDXVAV():
     loop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
     # replace components in demand side zones
     branch = idf.getobject('BRANCH', 'DX Cooling Coil System 1')
+#    oa_sys = idf.newidfobject('AIRLOOPHVAC:OUTDOORAIRSYSTEM', 'OA Sys 1')
     coil_sys = idf.newidfobject(
         'COILSYSTEM:COOLING:DX', 'DX Cooling Coil System 1')
-    coil = idf.newidfobject('COIL:HEATING:GAS', 'Main Heating Coil 1')
+    heat_coil = idf.newidfobject('COIL:HEATING:GAS', 'Main Heating Coil 1')
     fan = idf.newidfobject('FAN:VARIABLEVOLUME', 'Supply Fan 1')
-    new_components = [coil_sys, coil, fan]
+    new_components = [coil_sys, heat_coil, fan]
+#    new_components = [oa_sys, coil_sys, heat_coil, fan]
     loop.replacebranch(branch, new_components)
     
     idf.save()
