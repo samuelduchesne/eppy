@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 
 import os
 
-from eppy.hvacbuilder import replacebranch
+#from eppy.hvacbuilder import replacebranch
 from eppy.iddcurrent import iddcurrent
 from eppy.modeleditor import IDF
 from eppy.pytest_helpers import IDD_FILES
@@ -51,7 +51,7 @@ def test_make5ZoneAutoDXVAV():
     fan = idf.newidfobject('FAN:VARIABLEVOLUME', 'Supply Fan 1')
     new_components = [coil_sys, coil, fan]
 #    new_components = [oa_sys, coil_sys, coil, fan]
-    replacebranch(idf, loop, branch, new_components, fluid='air')
+    loop.replacebranch(branch, new_components, fluid='air')
     
     idf.save()
     idd = os.path.join(IDD_FILES,'Energy+V8_1_0.idd')
