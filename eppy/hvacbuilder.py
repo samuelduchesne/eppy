@@ -677,8 +677,31 @@ class AirLoopHVAC(Loop):
             the replacement components.
         
         """
-        pass
-    
+        newcomponents = _clean_listofcomponents(newcomponents)
+        connectcomponents(self.idf, newcomponents)
+        # ZoneHVAC:EquipmentList
+        # get zone equipment list
+        list_name = '%s equip list' % zone
+        equipment_list = self.idf.getobject('ZONEHVAC:EQUIPMENTLIST', list_name)
+        equipment = getzoneequipment(self.idf, equipment_list)
+        # empty the zone equipment list
+        for component in equipment:
+            self.idf.removeidfobject(component)
+        self.idf.removeextensibles('ZONEHVAC:EQUIPMENTLIST', list_name)
+        # add the new components
+        for i, component in enumerate(newcomponents, 1):
+            fld = 'Zone_Equipment_%s_Object_Type' % i
+            equipment_list[fld] = component[0].key
+            fld = 'Zone_Equipment_%s_Name' % i
+            equipment_list[fld] = component[0].Name
+        # ZoneHVAC:EquipmentConnections
+        connections = self.idf.getobject('ZONEHVAC:EQUIPMENTCONNECTIONS', zone)
+        zone_inlet = connections.Zone_Air_Inlet_Node_or_NodeList_Name
+        zone_outlet = connections.Zone_Return_Air_Node_Name
+        for i, component in enumerate(newcomponents):
+            pass
+            # get inlet fields
+            # get outlet fields
     
 def pipebranch(idf, branchname):
     """Make a branch with a pipe using standard inlet and outlet names.
@@ -790,7 +813,7 @@ def getbranchcomponents(idf, branch, utest=False):
     idf : IDF
         The IDF.
     branch : EpBunch
-        the branch to look on.
+        The branch to look on.
     utest : bool
         Flag whether we are in a unit test.
     
@@ -817,7 +840,45 @@ def getbranchcomponents(idf, branch, utest=False):
     if utest:
         return complist
     else:
-        return [idf.getobject(ot, on) for ot, on in complist]
+        return [idf.getobject(ot.upper(), on) for ot, on in complist]
+
+
+def getzoneequipment(idf, zone, utest=False):
+    """Get the equipment in a zone.
+    
+    Parameters
+    ----------
+    idf : IDF
+        The IDF.
+    zone : EpBunch
+        The zone to look in.
+    utest : bool
+        Flag whether we are in a unit test.
+    
+    Returns
+    -------
+    list
+        Either a list of EpBunch objects, or a list of tuples if unit testing.
+    
+    """
+    fobjtype = 'Zone_Equipment_%s_Object_Type'
+    fobjname = 'Zone_Equipment_%s_Name'
+    complist = []
+    for i in range(1, 100000):
+        try:
+            objtype = zone[fobjtype % (i, )]
+            if objtype.strip() == '':
+                break
+            objname = zone[fobjname % (i, )]
+            complist.append((objtype, objname))
+        except bunch_subclass.BadEPFieldError:
+            # TODO: unit test
+            # When should this be triggered?
+            break
+    if utest:
+        return complist
+    else:
+        return [idf.getobject(ot.upper(), on) for ot, on in complist]
 
 
 def renamenodes(idf, fieldtype):
@@ -904,6 +965,8 @@ def getnodefieldname(idfobject, endswith, fluid=None, startswith=None):
         # TODO: unit test
         fluid = ''
     nodenames = getfieldnamesendswith(idfobject, endswith)
+    if not nodenames:
+        return []
     nodenames = [name for name in nodenames if name.startswith(startswith)]
     fnodenames = [nd for nd in nodenames if nd.find(fluid) != -1]
     fnodenames = [name for name in fnodenames if name.startswith(startswith)]
@@ -952,7 +1015,8 @@ def connectcomponents(idf, components, fluid=None):
                                           fluid=fluid, startswith=thiscompnode)
         thiscomp[outletnodename] = [thiscomp[outletnodename], betweennodename]
         inletnodename = getnodefieldname(nextcomp, "Inlet_Node_Name", fluid)
-        nextcomp[inletnodename] = [nextcomp[inletnodename], betweennodename]
+        if inletnodename:
+            nextcomp[inletnodename] = [nextcomp[inletnodename], betweennodename]
     return components
 
 

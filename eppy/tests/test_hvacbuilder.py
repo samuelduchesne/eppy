@@ -79,6 +79,12 @@ def test_makeVAVSingleDuctReheat():
     airloop.replacebranch(branch, [(coil, 'Air_')])
     branch = idf.getobject('BRANCH', 'detailed cooling coil waterside')
     cwloop.replacebranch(branch, [(coil, 'Water_')])
+    
+    vav = idf.getmakeidfobject(
+        'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', 'Zone 1 VAV System')
+    dist_unit = idf.getmakeidfobject(
+        'ZONEHVAC:AIRDISTRIBUTIONUNIT', 'Zone1TermReheat')
+    airloop.replacezoneequipment('Zone 1', [(vav, 'Air_'), (dist_unit, 'Air_')])
 
     idf.save()
     idd = os.path.join(IDD_FILES,'Energy+V8_1_0.idd')
