@@ -36,30 +36,21 @@ def test_makeVAVSingleDuctReheat():
     idf.new('myVAVSingleDuctReheat.idf')
     # Air Loop Main Branch
     loopname = 'Air Loop'
-    sloop = ['fan',
-                ['detailed cooling coil'],
-             'airloop_out']
-    dloop = ['z_in', 
-                ['Zone 1', 'Zone 2', 'Zone 3'],
-             'z_out']
-    loop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
+    sloop = ['fan', ['detailed cooling coil airside'], 'airloop_out']
+    dloop = ['z_in',  ['Zone 1', 'Zone 2', 'Zone 3'], 'z_out']
+    airloop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
 
     # Cold water loop
     loopname = 'CW'
     sloop = ['circ pump',
-             ['big chiller', 'little chiller', 'purchased cooling', 'cws bypass'],
+             ['big chiller', 'little chiller',
+              'purchased cooling', 'cws bypass'],
              'cw supply outlet']
     dloop = ['cw demand inlet',
-             ['cwd bypass', 'detailed cooling coil'],
+             ['cwd bypass', 'detailed cooling coil waterside'],
              'cw demand outlet']
-    loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
+    cwloop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
     
-    branch = idf.getobject('BRANCH', 'detailed cooling coil')
-    coil = idf.getmakeidfobject(
-        'COIL:COOLING:WATER:DETAILEDGEOMETRY', 'detailed cooling coil')
-    loop.replacebranch(branch, [coil], 'WATER')
-#    loop.replacebranch(branch, [coil], 'AIR')
-
     # Condenser loop
     loopname = 'Condenser'
     sloop = ['cond circ pump',
@@ -68,8 +59,26 @@ def test_makeVAVSingleDuctReheat():
     dloop = ['cond demand inlet',
              ['big chiller', 'little chiller', 'cond d bypass'],
              'cond demand outlet']
-    loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
+    cond_loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
     
+    # Hot water loop
+    loopname = 'HW'
+    sloop = ['HW circ pump',
+             ['purchased heating', 'hws bypass'],
+             'hw supply outlet']
+    dloop = ['hw demand inlet',
+             ['reheat coil zone 1', 'reheat coil zone 2', 'reheat coil zone 3',
+              'reheat bypass'],
+             'hw demand outlet']
+    hw_loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
+
+    # replace the coil placeholder
+    coil = idf.getmakeidfobject(
+        'COIL:COOLING:WATER:DETAILEDGEOMETRY', 'detailed cooling coil')
+    branch = idf.getobject('BRANCH', 'detailed cooling coil airside')
+    airloop.replacebranch(branch, [(coil, 'Air_')])
+    branch = idf.getobject('BRANCH', 'detailed cooling coil waterside')
+    cwloop.replacebranch(branch, [(coil, 'Water_')])
 
     idf.save()
     idd = os.path.join(IDD_FILES,'Energy+V8_1_0.idd')
