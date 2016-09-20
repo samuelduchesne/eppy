@@ -280,20 +280,11 @@ class Loop(object):
         if fluid is None:
             # TODO: unit test
             fluid = ''
-        # join them into a branch
-        # -----------------------
-        # np1_inlet -> np1 -> np1_np2_node -> np2 -> np2_outlet
-            # change the node names in the component
-            # empty the old branch
-            # fill in the new components with the node names into this branch
         newcomponents = _clean_listofcomponents(newcomponents)
+        # change the node names in the component
         connectcomponents(self.idf, newcomponents, fluid=fluid)
-    
-        componentsintobranch(self.idf, branch, newcomponents, fluid=fluid)
-    
-        # # gather all renamed nodes
-        # # do the renaming
-        renamenodes(self.idf, 'node')
+        # fill in the new components with the node names into this branch
+        componentsintobranch(self.idf, branch, newcomponents, fluid=fluid)    
     
         # for use in bunch
         flnames = [field.replace(' ', '_') for field in self.loopfields]
@@ -301,8 +292,6 @@ class Loop(object):
                                 
         if fluid.upper() == 'WATER':
             self.replace_demandside(branch, fluid, flnames)
-        # # gather all renamed nodes
-        # # do the renaming
         renamenodes(self.idf, 'node')
     
         return branch
@@ -536,6 +525,14 @@ class AirLoopHVAC(Loop):
         self.supply_branchlist = self.idf.newidfobject(
             "BRANCHLIST", 
             self.Branch_List_Name)
+    
+    def make_supply_branches(self):
+        supply_branchnames = flattencopy(self.sloop)
+        for branchname in supply_branchnames:
+            self.supply_branchlist.obj.append(branchname)
+        supply_branches = [ductbranch(self.idf, branchname) 
+                           for branchname in supply_branchnames]
+        self.s_branches = supply_branches
         
     def make_demand_branches(self):
         """Make components on the demand side of the loop.
@@ -688,7 +685,7 @@ def pipebranch(idf, branchname):
     pname = "%s_pipe" % (branchname, )
     pipe = pipecomponent(idf, pname)
     # now make the branch with the pipe in it
-    branch = idf.newidfobject("BRANCH", branchname)
+    branch = idf.getmakeidfobject("BRANCH", branchname)
     branch.Component_1_Object_Type = 'Pipe:Adiabatic'
     branch.Component_1_Name = pname
     branch.Component_1_Inlet_Node_Name = pipe.Inlet_Node_Name
@@ -713,7 +710,7 @@ def pipecomponent(idf, pname):
         The PIPE:ADIABATIC object.
         
     """
-    pipe = idf.newidfobject("PIPE:ADIABATIC", pname)
+    pipe = idf.getmakeidfobject("PIPE:ADIABATIC", pname)
     pipe.Inlet_Node_Name = "%s_inlet" % (pname, )
     pipe.Outlet_Node_Name = "%s_outlet" % (pname, )
     return pipe
@@ -739,7 +736,7 @@ def ductbranch(idf, bname):
     pname = "%s_duct" % (bname, )
     duct = ductcomponent(idf, pname)
     # now make the branch with the duct in it
-    branch = idf.newidfobject("BRANCH", bname)
+    branch = idf.getmakeidfobject("BRANCH", bname)
     branch.Component_1_Object_Type = 'duct'
     branch.Component_1_Name = pname
     branch.Component_1_Inlet_Node_Name = duct.Inlet_Node_Name
@@ -764,7 +761,7 @@ def ductcomponent(idf, dname):
         The DUCT object.
         
     """
-    duct = idf.newidfobject("DUCT", dname)
+    duct = idf.getmakeidfobject("DUCT", dname)
     duct.Inlet_Node_Name = "%s_inlet" % (dname, )
     duct.Outlet_Node_Name = "%s_outlet" % (dname, )
     return duct
