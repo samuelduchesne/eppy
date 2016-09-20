@@ -42,16 +42,13 @@ def test_make5ZoneAutoDXVAV():
     idf.new('my5ZoneAutoDXVAV.idf')
     loop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
     # replace components in demand side zones
-    # list_of_components = []
     branch = idf.getobject('BRANCH', 'DX Cooling Coil System 1')
-#    oa_sys = idf.newidfobject('AIRLOOPHVAC:OUTDOORAIRSYSTEM', 'OA Sys 1')
     coil_sys = idf.newidfobject(
         'COILSYSTEM:COOLING:DX', 'DX Cooling Coil System 1')
     coil = idf.newidfobject('COIL:HEATING:GAS', 'Main Heating Coil 1')
     fan = idf.newidfobject('FAN:VARIABLEVOLUME', 'Supply Fan 1')
     new_components = [coil_sys, coil, fan]
-#    new_components = [oa_sys, coil_sys, coil, fan]
-    loop.replacebranch(branch, new_components, fluid='air')
+    loop.replacebranch(branch, new_components)
     
     idf.save()
     idd = os.path.join(IDD_FILES,'Energy+V8_1_0.idd')
