@@ -5,13 +5,16 @@
 #  (See accompanying file LICENSE or copy at
 #  http://opensource.org/licenses/MIT)
 # =======================================================================
-"""py.test for hvacbuilder"""
+"""py.test for hvacbuilder
+"""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+import subprocess
 
 from eppy.iddcurrent import iddcurrent
 from eppy.modeleditor import IDF
@@ -22,11 +25,46 @@ import eppy.hvacbuilder as hvacbuilder
 from eppy.useful_scripts.loopdiagram import LoopDiagram
 
 
-# idd is read only once in this test
-# if it has already been read from some other test, it will continue with the old reading
 iddfhandle = StringIO(iddcurrent.iddtxt)
 if IDF.getiddname() == None:
     IDF.setiddname(iddfhandle)
+
+
+def show_graph(idf):
+    idf.printidf()
+    idd = os.path.join(IDD_FILES, 'Energy+V8_5_0.idd')
+    idf.save()
+    filepath = os.path.abspath(idf.idfname)
+    diagram = LoopDiagram(filepath, idd)
+    diagram.save()
+    filepath = os.path.abspath(idf.idfname[:-3] + 'png')
+    subprocess.call("start " + filepath, shell=True)
+
+
+def test_replace_zoneequipment():
+    """Removing equipment from a zone and replacing it with a new system.
+    """
+    idf = IDF()
+    idf.new('replace_zone_equipment.idf')
+    # Air Loop Main Branch
+    loopname = 'Air Loop'
+    sloop = ['fan', ['coil 1 air', 'coil 2 air', 'coil 3 air'], 'airloop_out']
+    dloop = ['z_in',  ['Zone 1', 'Zone 2', 'Zone 3'], 'z_out']
+    airloop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
+    
+    zone = 'Zone 1'
+    coil = idf.newidfobject('COIL:HEATING:WATER', '%s heating coil' % zone)
+    components = [(coil, 'Damper_Air_Outlet_', '')]
+    airloop.replace_zoneequipment(
+        zone, 'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', components)
+    
+    #===========================================================================
+    # zone = 'Zone 2'
+    # components = []
+    # airloop.replace_zoneequipment(
+    #     zone, 'AIRTERMINAL:SINGLEDUCT:INLETSIDEMIXER', components)
+    #===========================================================================
+    show_graph(idf)
 
 
 def test_makeVAVSingleDuctReheat():
@@ -36,18 +74,18 @@ def test_makeVAVSingleDuctReheat():
     idf.new('myVAVSingleDuctReheat.idf')
     # Air Loop Main Branch
     loopname = 'Air Loop'
-    sloop = ['fan', ['detailed cooling coil airside'], 'airloop_out']
+    sloop = ['fan', ['detailed cooling coil air'], 'airloop_out']
     dloop = ['z_in',  ['Zone 1', 'Zone 2', 'Zone 3'], 'z_out']
     airloop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
 
     # Cold water loop
     loopname = 'CW'
     sloop = ['circ pump',
-             ['big chiller', 'little chiller',
+             ['big chiller cw', 'little chiller cw',
               'purchased cooling', 'cws bypass'],
              'cw supply outlet']
     dloop = ['cw demand inlet',
-             ['cwd bypass', 'detailed cooling coil waterside'],
+             ['cwd bypass', 'detailed cooling coil water'],
              'cw demand outlet']
     cwloop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
     
@@ -57,7 +95,7 @@ def test_makeVAVSingleDuctReheat():
              ['big tower', 'cond s bypass'],
              'cond supply outlet']
     dloop = ['cond demand inlet',
-             ['big chiller', 'little chiller', 'cond d bypass'],
+             ['big chiller cond', 'little chiller cond', 'cond d bypass'],
              'cond demand outlet']
     cond_loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
     
@@ -67,29 +105,32 @@ def test_makeVAVSingleDuctReheat():
              ['purchased heating', 'hws bypass'],
              'hw supply outlet']
     dloop = ['hw demand inlet',
-             ['reheat coil zone 1', 'reheat coil zone 2', 'reheat coil zone 3',
+             ['Zone 1 heating coil', 'Zone 2 heating coil', 'Zone 3 heating coil',
               'reheat bypass'],
              'hw demand outlet']
     hw_loop = hvacbuilder.makeplantloop(idf, loopname, sloop, dloop)
 
-    # replace the coil placeholder
+    # replace the cw coil placeholder
     coil = idf.getmakeidfobject(
         'COIL:COOLING:WATER:DETAILEDGEOMETRY', 'detailed cooling coil')
-    branch = idf.getobject('BRANCH', 'detailed cooling coil airside')
+    branch = idf.getobject('BRANCH', 'detailed cooling coil air')
     airloop.replacebranch(branch, [(coil, 'Air_')])
-    branch = idf.getobject('BRANCH', 'detailed cooling coil waterside')
+    branch = idf.getobject('BRANCH', 'detailed cooling coil water')
     cwloop.replacebranch(branch, [(coil, 'Water_')])
     
-    vav = idf.getmakeidfobject(
-        'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', 'Zone 1 VAV System')
-    dist_unit = idf.getmakeidfobject(
-        'ZONEHVAC:AIRDISTRIBUTIONUNIT', 'Zone1TermReheat')
-    airloop.replacezoneequipment('Zone 1', [(vav, 'Air_'), (dist_unit, 'Air_')])
+    # replace the reheat coils for each zone
+    for zone in airloop.dloop[1]:
+        hw_coil = idf.newidfobject('COIL:HEATING:WATER', '%s heating coil' % zone)
+        branch = idf.getobject('BRANCH', '%s heating coil' % zone)
+        hw_loop.replacebranch(branch, [(hw_coil, 'Water_')])
+        components = [(hw_coil, 'Damper_Air_Outlet_', '')]
+        airloop.replace_zoneequipment(
+            zone, 'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', components)
 
     idf.save()
     idd = os.path.join(IDD_FILES,'Energy+V8_1_0.idd')
     diagram = LoopDiagram('myVAVSingleDuctReheat.idf', idd)
-    diagram.save()
+    show_graph(idf)
 
 
 def test_make5ZoneAutoDXVAV():
@@ -150,20 +191,20 @@ def test_makeairloop():
         db1 Outlet Node, db2 Outlet Node, db3 Outlet Node;  
         AIRLOOPHVAC:RETURNPATH, p_loopReturnPath, p_loop Demand Outlet, 
         AirLoopHVAC:ZoneMixer, p_loop Demand Side Mixer;  BRANCH, sb0, 0, , 
-        Pipe:Adiabatic, sb0_pipe, sb0_pipe_inlet, sb0_pipe_outlet, Bypass;  
-        BRANCH, sb1, 0, , Pipe:Adiabatic, sb1_pipe, sb1_pipe_inlet, 
-        sb1_pipe_outlet, Bypass;  BRANCH, sb2, 0, , Pipe:Adiabatic, sb2_pipe, 
-        sb2_pipe_inlet, sb2_pipe_outlet, Bypass;  BRANCH, sb3, 0, , 
-        Pipe:Adiabatic, sb3_pipe, sb3_pipe_inlet, sb3_pipe_outlet, Bypass;  
-        BRANCH, sb4, 0, , Pipe:Adiabatic, sb4_pipe, sb4_pipe_inlet, 
-        sb4_pipe_outlet, Bypass;  BRANCHLIST, p_loop Branchs, sb0, sb1, sb2, 
+        duct, sb0_duct, sb0_duct_inlet, sb0_duct_outlet, Bypass;  
+        BRANCH, sb1, 0, , duct, sb1_duct, sb1_duct_inlet, 
+        sb1_duct_outlet, Bypass;  BRANCH, sb2, 0, , duct, sb2_duct, 
+        sb2_duct_inlet, sb2_duct_outlet, Bypass;  BRANCH, sb3, 0, , 
+        duct, sb3_duct, sb3_duct_inlet, sb3_duct_outlet, Bypass;  
+        BRANCH, sb4, 0, , duct, sb4_duct, sb4_duct_inlet, 
+        sb4_duct_outlet, Bypass;  BRANCHLIST, p_loop Branchs, sb0, sb1, sb2, 
         sb3, sb4;  CONNECTORLIST, p_loop Connectors, Connector:Splitter,
         p_loop_supply_splitter, Connector:Mixer, p_loop_supply_mixer;  
         PIPE:ADIABATIC, sb0_pipe, sb0_pipe_inlet, sb0_pipe_outlet;  
         PIPE:ADIABATIC, sb1_pipe, sb1_pipe_inlet, sb1_pipe_outlet;  
-        PIPE:ADIABATIC, sb2_pipe, sb2_pipe_inlet, sb2_pipe_outlet;  
-        PIPE:ADIABATIC, sb3_pipe, sb3_pipe_inlet, sb3_pipe_outlet;  
-        PIPE:ADIABATIC, sb4_pipe, sb4_pipe_inlet, sb4_pipe_outlet; """
+        PIPE:ADIABATIC, sb2_duct, sb2_duct_inlet, sb2_duct_outlet;  
+        PIPE:ADIABATIC, sb3_duct, sb3_duct_inlet, sb3_duct_outlet;  
+        PIPE:ADIABATIC, sb4_duct, sb4_duct_inlet, sb4_duct_outlet; """
     ) # loopname, sloop, dloop, expected
 
     loopname, sloop, dloop, expected = tdata
@@ -184,7 +225,7 @@ def test_makeplantloop():
         ['db0', ['db1', 'db2', 'db3'], 'db4'],
         """BRANCH, sb0, 0, , Pipe:Adiabatic, sb0_pipe, p_loop Supply Inlet, 
         sb0_pipe_outlet, Bypass;  BRANCH, sb1, 0, , Pipe:Adiabatic, sb1_pipe, 
-        sb1_pipe_inlet, sb1_pipe_outlet, Bypass;  BRANCH, sb2, 0, , 
+        sb1_pipe_inlet, sb1_duct_outlet, Bypass;  BRANCH, sb2, 0, , 
         Pipe:Adiabatic, sb2_pipe, sb2_pipe_inlet, sb2_pipe_outlet, Bypass;  
         BRANCH, sb3, 0, , Pipe:Adiabatic, sb3_pipe, sb3_pipe_inlet, 
         sb3_pipe_outlet, Bypass;  BRANCH, sb4, 0, , Pipe:Adiabatic, sb4_pipe, 
@@ -206,7 +247,7 @@ def test_makeplantloop():
         CONNECTORLIST, p_loop Demand Connectors, Connector:Splitter, 
         p_loop_demand_splitter, Connector:Mixer, p_loop_demand_mixer;  
         PIPE:ADIABATIC, sb0_pipe, p_loop Supply Inlet, sb0_pipe_outlet;  
-        PIPE:ADIABATIC, sb1_pipe, sb1_pipe_inlet, sb1_pipe_outlet;  
+        PIPE:ADIABATIC, sb1_duct, sb1_duct_inlet, sb1_duct_outlet;  
         PIPE:ADIABATIC, sb2_pipe, sb2_pipe_inlet, sb2_pipe_outlet;  
         PIPE:ADIABATIC, sb3_pipe, sb3_pipe_inlet, sb3_pipe_outlet;  
         PIPE:ADIABATIC, sb4_pipe, sb4_pipe_inlet, p_loop Supply Outlet;  
@@ -787,5 +828,6 @@ def test__clean_listofcomponents_tuples():
     for lst, clst in data:
         result = hvacbuilder._clean_listofcomponents_tuples(lst)
         assert result == clst
+        
 
         

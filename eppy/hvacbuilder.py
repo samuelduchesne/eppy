@@ -7,6 +7,7 @@
 # =======================================================================
 """Make EnergyPlus loops.
 """
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -634,7 +635,7 @@ class AirLoopHVAC(Loop):
                 **dict(Zone_Name=zone))[0]
             fld = "Outlet_%s_Node_Name" % (i + 1, )
             z_splitter[fld] = z_equipconn.Zone_Air_Inlet_Node_or_NodeList_Name
-        
+        self.zone_splitter = z_splitter
         # make AirLoopHVAC:SupplyPath
         z_supplypth = self.idf.newidfobject("AIRLOOPHVAC:SUPPLYPATH")
         z_supplypth.Name = "%sSupplyPath" % self.Name
@@ -655,6 +656,7 @@ class AirLoopHVAC(Loop):
                 **dict(Zone_Name=zone))[0]
             fld = "Inlet_%s_Node_Name" % (i + 1, )
             z_mixer[fld] = z_equipconn.Zone_Return_Air_Node_Name
+        self.zone_mixer = z_mixer
     
         # make AirLoopHVAC:ReturnPath
         z_returnpth = self.idf.newidfobject("AIRLOOPHVAC:RETURNPATH")
@@ -665,43 +667,144 @@ class AirLoopHVAC(Loop):
         z_returnpth.Component_1_Object_Type = "AirLoopHVAC:ZoneMixer"
         z_returnpth.Component_1_Name = z_mixer.Name
     
-    def replacezoneequipment(self, zone, newcomponents):
-        """Replace zone equipment in a zone and update references in the IDF.
+    def replace_zoneequipment(self, zone, terminal_type, components):
+        """Replace zone equipment for a zone.
         
         Parameters
         ----------
         zone : str
             Name of the zone.
-        newcomponents : list
-            List of EpBunch objects, or tuples like (EpBunch, node_prefix), for
-            the replacement components.
+        terminal_type : str
+            EnergyPlus object type, e.g. "AirTerminal:SingleDuct:ConstantVolume:Reheat".
+        components : list of tuples
+            These are for each item of equipment in the zone.
+            Tuples are in the form:
+            example: [(coil, 'Damper_Air_Outlet', '')]
+
+        """
+        self.remove_zoneequipment(zone)
+        self.make_zoneequipment(zone, terminal_type, components)
+
+    def make_zoneequipment(self, zone, terminal_type, components):
+        """Create the equipment for a zone.
+        
+        Parameters
+        ----------
+        zone : str
+            Name of the zone.
+        terminal_type : str
+            EnergyPlus object type, e.g. "AirTerminal:SingleDuct:ConstantVolume:Reheat".
+        components : list of tuples
+            These are for each item of equipment in the zone.
+            Tuples are in the form:
+            example: [(coil, 'Damper_Air_Outlet', '')]
+
+        """
+        idf = self.idf
+        # name the inlets and outlets
+        for component_tuple in components:
+            component = component_tuple[0]
+            inlets = getfieldnamesendswith(component, 'Inlet_Node_Name')
+            outlets = getfieldnamesendswith(component, 'Outlet_Node_Name')
+            for inlet in inlets:
+                component[inlet] = '%s %s' % (
+                    component.Name, inlet.replace('_Node_Name', ''))
+            for outlet in outlets:
+                component[outlet] = '%s %s' % (
+                    component.Name, outlet.replace('_Node_Name', ''))
+        
+        # air terminal
+        terminal = idf.newidfobject(
+            terminal_type.upper(), "%s air terminal" % zone)
+        self.set_terminal_nodes(terminal, zone, components)
+        # air distribution unit
+        adu = idf.newidfobject(
+            'ZONEHVAC:AIRDISTRIBUTIONUNIT', '%s air distribution unit' % zone,
+            Air_Distribution_Unit_Outlet_Node_Name=terminal.Air_Outlet_Node_Name,
+            Air_Terminal_Object_Type=terminal.key,
+            Air_Terminal_Name="%s air terminal" % zone)
+        
+        # equipment list
+        equipment_list = idf.newidfobject(
+            "ZONEHVAC:EQUIPMENTLIST", "%s equip list" % zone)
+        equipment_list.Zone_Equipment_1_Object_Type = adu.key
+        equipment_list.Zone_Equipment_1_Name = adu.Name
+        
+        # zone nodes
+        idf.getmakeidfobject(
+            'NODELIST', "%s inlet nodes" % zone,
+            Node_1_Name=terminal.Air_Outlet_Node_Name)
+        
+        # equipment connections
+        conns = idf.newidfobject("ZONEHVAC:EQUIPMENTCONNECTIONS")
+        conns.Zone_Name = zone
+        conns.Zone_Conditioning_Equipment_List_Name="%s equip list" % zone
+        conns.Zone_Air_Inlet_Node_or_NodeList_Name="%s inlet nodes" % zone
+        conns.Zone_Air_Node_Name="%s Node" % zone
+        conns.Zone_Return_Air_Node_Name="%s Outlet Node" % zone
+
+    def remove_zoneequipment(self, zone):
+        """Remove the zone equipment from a zone.
+        
+        Parameters
+        ----------
+        zone : str
         
         """
-        newcomponents = _clean_listofcomponents(newcomponents)
-        connectcomponents(self.idf, newcomponents)
-        # ZoneHVAC:EquipmentList
-        # get zone equipment list
-        list_name = '%s equip list' % zone
-        equipment_list = self.idf.getobject('ZONEHVAC:EQUIPMENTLIST', list_name)
-        equipment = getzoneequipment(self.idf, equipment_list)
-        # empty the zone equipment list
-        for component in equipment:
-            self.idf.removeidfobject(component)
-        self.idf.removeextensibles('ZONEHVAC:EQUIPMENTLIST', list_name)
-        # add the new components
-        for i, component in enumerate(newcomponents, 1):
-            fld = 'Zone_Equipment_%s_Object_Type' % i
-            equipment_list[fld] = component[0].key
-            fld = 'Zone_Equipment_%s_Name' % i
-            equipment_list[fld] = component[0].Name
-        # ZoneHVAC:EquipmentConnections
-        connections = self.idf.getobject('ZONEHVAC:EQUIPMENTCONNECTIONS', zone)
-        zone_inlet = connections.Zone_Air_Inlet_Node_or_NodeList_Name
-        zone_outlet = connections.Zone_Return_Air_Node_Name
-        for i, component in enumerate(newcomponents):
-            pass
-            # get inlet fields
-            # get outlet fields
+        idf = self.idf
+        equipment_list = idf.getobject(
+            'ZONEHVAC:EQUIPMENTLIST', '%s equip list' % zone)
+        connections = idf.getobject("ZONEHVAC:EQUIPMENTCONNECTIONS", zone)
+        idf.removeidfobject(connections)
+        for i in range(1, 100000):
+            ctypefld = 'Zone_Equipment_%s_Object_Type' % i
+            cnamefld = 'Zone_Equipment_%s_Name' % i
+            ctype = equipment_list[ctypefld].upper()
+            cname = equipment_list[cnamefld]
+            if cname == '':
+                break
+            component = idf.getobject(ctype, cname)
+            idf.removeidfobject(component)
+        idf.removeidfobject(equipment_list)
+
+    def set_terminal_nodes(self, terminal, zone, components):
+        """Calculate and set a terminal's node names.
+        """      
+        # Air Outlet
+        # value is the same as last component's air outlet value
+        last, _c_in, _c_out = components[-1]
+        outlet_fld = getnodefieldname(last, endswith='Outlet_Node_Name', fluid='air')
+        air_outlet_node = last[outlet_fld]
+        # now the terminal's air outlet field
+        fld = 'Air_Outlet_Node_Name'  # TODO: Find this
+        terminal[fld] = air_outlet_node
+        
+        # Air Inlet
+        # air inlet is the same as the one for the zone on the ZoneSplitter object
+        air_inlet_node = "%s Inlet Node" % zone
+        # now the terminal's air outlet field
+        fld = 'Air_Inlet_Node_Name'  # TODO: Find this
+        terminal[fld] = air_inlet_node
+        
+        for component, c_in, c_out in components:
+            # c_in: prefix of the terminal node that the component inlet joins
+            # c_out: prefix of the terminal node that the component outlet joins
+            terminal_node_name = getnodefieldname(
+                terminal, endswith='Node_Name', startswith=c_in)
+            component_node_name = getnodefieldname(
+                terminal, endswith='Inlet_Node_Name', fluid='air')
+            component_node_value = component[component_node_name]
+            terminal[terminal_node_name] = component_node_value
+            if c_out:
+                terminal_node_name = getnodefieldname(
+                    terminal, endswith='Node_Name', startswith=c_out)
+                component_node_name = getnodefieldname(
+                    terminal, endswith='Outlet_Node_Name')
+                component_node_value = component[component_node_name]
+                terminal[terminal_node_name] = component_node_value
+    
+    
+
     
 def pipebranch(idf, branchname):
     """Make a branch with a pipe using standard inlet and outlet names.
@@ -968,7 +1071,7 @@ def getnodefieldname(idfobject, endswith, fluid=None, startswith=None):
     if not nodenames:
         return []
     nodenames = [name for name in nodenames if name.startswith(startswith)]
-    fnodenames = [nd for nd in nodenames if nd.find(fluid) != -1]
+    fnodenames = [nd for nd in nodenames if fluid.upper() in nd.upper()]
     fnodenames = [name for name in fnodenames if name.startswith(startswith)]
     if len(fnodenames) == 0:
         nodename = nodenames[0]
@@ -1020,7 +1123,7 @@ def connectcomponents(idf, components, fluid=None):
     return components
 
 
-def initinletoutlet(idf, idfobject, thisnode, force=False):
+def initinletoutlet(idf, idfobject, nodeprefix, force=False):
     """Initialize values for all the inlet and outlet nodes for the object.
     
     Parameters
@@ -1040,53 +1143,53 @@ def initinletoutlet(idf, idfobject, thisnode, force=False):
     EpBunch
     
     """
-    def is_empty(fieldvalue):
-        """Test for an empty field.
-        """
-        try:
-            if fieldvalue.strip() == '':
-                return True
-            else:
-                return False
-        except AttributeError: # field may be a list
-            return False
-        
-    def trimfields(fields, thisnode):
-        """
-        Parameters
-        ----------
-        fields : list
-            ??
-        thisnode : str
-            ??
-        """
-        if len(fields) > 1:
-            if thisnode is not None:
-                fields = [field for field in fields
-                          if field.startswith(thisnode)]
-                return fields
-            else:
-                # TODO: unit test
-                print("Where should this loop connect?")
-                print("%s - %s" % (idfobject.key, idfobject.Name))
-                print([field.split("Inlet_Node_Name")[0]
-                       for field in inletfields])
-                raise WhichLoopError
-        else:
-            return fields
-
     inletfields = getfieldnamesendswith(idfobject, "Inlet_Node_Name")
-    inletfields = trimfields(inletfields, thisnode) # or warn with exception
+    inletfields = trimfields(idfobject, inletfields, nodeprefix) # or warn with exception
     for inletfield in inletfields:
         if is_empty(idfobject[inletfield]) or force == True:
             idfobject[inletfield] = "%s_%s" % (idfobject.Name, inletfield)
     outletfields = getfieldnamesendswith(idfobject, "Outlet_Node_Name")
-    outletfields = trimfields(outletfields, thisnode) # or warn with exception
+    outletfields = trimfields(idfobject, outletfields, nodeprefix) # or warn with exception
     for outletfield in outletfields:
         if is_empty(idfobject[outletfield]) or force == True:
             idfobject[outletfield] = "%s_%s" % (idfobject.Name, outletfield)
     return idfobject
 
+
+def is_empty(fieldvalue):
+    """Test for an empty field.
+    """
+    try:
+        if fieldvalue.strip() == '':
+            return True
+        else:
+            return False
+    except AttributeError: # field may be a list
+        return False
+    
+def trimfields(idfobject, fields, nodeprefix):
+    """
+    Parameters
+    ----------
+    fields : list
+        ??
+    thisnode : str
+        ??
+    """
+    if len(fields) > 1:
+        if nodeprefix is not None:
+            fields = [field for field in fields
+                      if field.startswith(nodeprefix)]
+            return fields
+        else:
+            # TODO: unit test
+            print("Where should this loop connect?")
+            print("%s - %s" % (idfobject.key, idfobject.Name))
+            print([field.split("Inlet_Node_Name")[0]
+                   for field in fields])
+            raise WhichLoopError
+    else:
+        return fields
 
 def componentsintobranch(idf, branch, listofcomponents, fluid=None):
     """Insert a list of components into a branch.
