@@ -15,6 +15,7 @@ from __future__ import unicode_literals
 
 import os
 import subprocess
+import sys
 
 from eppy.iddcurrent import iddcurrent
 from eppy.modeleditor import IDF
@@ -31,21 +32,29 @@ if IDF.getiddname() == None:
 
 
 def show_graph(idf):
+    """View the loop diagram of an IDF.
+    
+    Use this to debug hvac loop building.
+    
+    Parameters
+    ----------
+    idf : IDF
+        An IDF to check the loop diagram of.
+        
+    """
     idd = os.path.join(IDD_FILES, 'Energy+V8_5_0.idd')
     idf.save('tmp.idf')
     filepath = os.path.abspath('tmp.idf')
     diagram = LoopDiagram(filepath, idd)
     diagram.save()
     filepath = os.path.abspath('tmp.png')
-    subprocess.call("start " + filepath, shell=True)
+    if sys.platform == 'win32':
+        subprocess.call("start " + filepath, shell=True)
+    else:
+        subprocess.call("open " + filepath, shell=True)
 
 
 class TestMakeLoops(object):
-    
-    def tearDown(self):
-        os.remove(os.path.abspath('tmp.idf'))
-        os.remove(os.path.abspath('tmp.png'))
-        
     
     def test_replace_zoneequipment(self):
         """Removing equipment from a zone and replacing it with a new system.
@@ -63,8 +72,7 @@ class TestMakeLoops(object):
             'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', '%s VAV Reheat' % zone)
         exhaust_fan = idf.newidfobject('FAN:ZONEEXHAUST', '%s exhaust fan' % zone)
         components = [terminal, exhaust_fan]
-        airloop.replace_zoneequipment(zone, components)
-    
+        airloop.replace_zoneequipment(zone, components)    
     
     def test_makeVAVSingleDuctReheat(self):
         """pytest to try and make a specific system.
@@ -127,8 +135,6 @@ class TestMakeLoops(object):
             components = [terminal]
             airloop.replace_zoneequipment(
                 zone, components)
-    
-        show_graph(idf)
     
     
     def test_makeairloop(self):
