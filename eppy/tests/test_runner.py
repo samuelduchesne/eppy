@@ -387,7 +387,7 @@ class TestIDFRunner(object):
         expected_version = VERSION.replace('-', '.')
         version_string = "EnergyPlus, Version {}".format(expected_version)
 
-        assert out.strip().startswith(version_string)
+        assert version_string in out.strip()
 
     def test_help(self, capfd):
         """
