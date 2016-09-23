@@ -429,8 +429,6 @@ class TestIDFRunner(object):
         self.expected_files.extend([])
         assert set(files) == set(self.expected_files)
         out, _err = capfd.readouterr()
-        if out:
-            print(out)
         assert len(out) == 0
 
 

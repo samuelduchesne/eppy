@@ -961,7 +961,6 @@ class IDF(object):
 
         s = s.encode(encoding)
         try:
-            print(os.path.abspath(filename))
             with open(filename, 'wb') as idf_out:
                 idf_out.write(s)
         except TypeError:  # in the case that filename is a file handle
