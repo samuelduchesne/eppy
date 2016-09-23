@@ -69,7 +69,6 @@ def test_loopdiagram_simple_integration():
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/Boiler.idf")
     diagram = LoopDiagram(fname, idd)
-    diagram.save()
 
 
 @pytest.mark.skipif(
@@ -79,4 +78,3 @@ def test_loopdiagram_airloop_integration():
     idd = os.path.join(IDD_FILES, "Energy+V8_1_0.idd")
     fname = os.path.join(IDF_FILES, "V8_1_0/AirLoopDiagramTest.idf")
     diagram = LoopDiagram(fname, idd)
-    diagram.save()
