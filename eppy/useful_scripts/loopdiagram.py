@@ -18,11 +18,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import argparse
 import itertools
 import os
 import sys
 
+import argparse
 from eppy.EPlusInterfaceFunctions import readidf
 from eppy.pytest_helpers import PATH_TO_EPPY
 from six import string_types
@@ -332,8 +332,26 @@ def edges2nodes(edges):
     """
     nodes = itertools.chain(*edges)
     unique_nodes = list(set(nodes))
-
-    return sorted(unique_nodes)
+    
+    def as_tuple(item):
+        """Ensure the item is a tuple so it can be compared.
+        
+        Parameters
+        ----------
+        item : str or tuple
+            The node to be sorted.
+        
+        Returns
+        -------
+        tuple
+            
+        """
+        if isinstance(item, string_types):
+            return (item, '')
+        else:
+            return item
+        
+    return sorted(unique_nodes, key=as_tuple)
     
     
 def makeanode(name):
