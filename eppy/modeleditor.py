@@ -25,8 +25,6 @@ from six import iteritems
 
 import eppy.EPlusInterfaceFunctions.iddgroups as iddgroups
 import eppy.function_helpers as function_helpers
-from eppy.runner.run_functions import run
-from eppy.runner.run_functions import wrapped_help_text
 
 
 class NoObjectError(Exception):
@@ -1010,25 +1008,6 @@ class IDF(object):
         """
         self.save(filename, lineendings, encoding)
         
-    @wrapped_help_text(run)
-    def run(self, **kwargs):
-        """
-        Run an IDF file with a given EnergyPlus weather file. This is a
-        wrapper for the EnergyPlus command line interface.
-
-        Parameters
-        ----------
-        **kwargs
-            See eppy.runner.functions.run()
-
-        """
-        # write the IDF to the current directory
-        self.saveas('in.idf')
-        # run EnergyPlus
-        run('in.idf', self.epw, **kwargs)
-        # remove in.idf
-        os.remove('in.idf')
-                
     def getiddgroupdict(self):
         """Return a idd group dictionary
         sample: {'Plant-Condenser Loops': ['PlantLoop', 'CondenserLoop'],
