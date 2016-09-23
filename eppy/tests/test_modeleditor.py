@@ -551,8 +551,6 @@ def test_refname2key():
         fhandle = StringIO("")
         idf = IDF(fhandle)
         result = modeleditor.refname2key(idf, refname)
-        print(refname)
-        print(result)
         assert result == key
 
 def test_getiddgroupdict():
