@@ -9,5 +9,5 @@ import os
 from eppy.pytest_helpers import IDD_FILES
 
 
-with open(os.path.join(IDD_FILES, 'Energy+V8_5_0.idd'), 'rb') as idd_file:
+with open(os.path.join(IDD_FILES, 'Energy+V8_5_0.idd'), 'r') as idd_file:
     iddtxt = idd_file.read()
