@@ -31,15 +31,15 @@ if IDF.getiddname() == None:
 
 
 def show_graph(idf):
-    idf.printidf()
     idd = os.path.join(IDD_FILES, 'Energy+V8_5_0.idd')
-    idf.save()
-    filepath = os.path.abspath(idf.idfname)
+    idf.save('tmp.idf')
+    filepath = os.path.abspath('tmp.idf')
     diagram = LoopDiagram(filepath, idd)
     diagram.save()
-    filepath = os.path.abspath(idf.idfname[:-3] + 'png')
+    filepath = os.path.abspath('tmp.png')
     subprocess.call("start " + filepath, shell=True)
-
+#    os.remove(os.path.abspath('tmp.idf'))
+#    os.remove(os.path.abspath('tmp.png'))
 
 def test_replace_zoneequipment():
     """Removing equipment from a zone and replacing it with a new system.
@@ -48,23 +48,20 @@ def test_replace_zoneequipment():
     idf.new('replace_zone_equipment.idf')
     # Air Loop Main Branch
     loopname = 'Air Loop'
-    sloop = ['fan', ['coil 1 air', 'coil 2 air', 'coil 3 air'], 'airloop_out']
-    dloop = ['z_in',  ['Zone 1', 'Zone 2', 'Zone 3'], 'z_out']
+    sloop = ['fan', ['coil 1 air', 'coil 2 air'], 'airloop_out']
+    dloop = ['z_in',  ['Zone 1', 'Zone 2'], 'z_out']
     airloop = hvacbuilder.makeairloop(idf, loopname, sloop, dloop)
     
     zone = 'Zone 1'
-    coil = idf.newidfobject('COIL:HEATING:WATER', '%s heating coil' % zone)
-    components = [(coil, 'Damper_Air_Outlet_', '')]
-    airloop.replace_zoneequipment(
-        zone, 'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', components)
-    
+    terminal = idf.newidfobject(
+        'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', '%s VAV Reheat' % zone)
+    exhaust_fan = idf.newidfobject('FAN:ZONEEXHAUST', '%s exhaust fan' % zone)
+    components = [terminal, exhaust_fan]
+    airloop.replace_zoneequipment(zone, components)
     #===========================================================================
-    # zone = 'Zone 2'
-    # components = []
-    # airloop.replace_zoneequipment(
-    #     zone, 'AIRTERMINAL:SINGLEDUCT:INLETSIDEMIXER', components)
+    # idf.printidf()
+    # show_graph(idf)
     #===========================================================================
-    show_graph(idf)
 
 
 def test_makeVAVSingleDuctReheat():
@@ -123,14 +120,16 @@ def test_makeVAVSingleDuctReheat():
         hw_coil = idf.newidfobject('COIL:HEATING:WATER', '%s heating coil' % zone)
         branch = idf.getobject('BRANCH', '%s heating coil' % zone)
         hw_loop.replacebranch(branch, [(hw_coil, 'Water_')])
-        components = [(hw_coil, 'Damper_Air_Outlet_', '')]
+        terminal = idf.newidfobject(
+            'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', '%s VAV Reheat' % zone)
+        components = [terminal]
         airloop.replace_zoneequipment(
-            zone, 'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT', components)
+            zone, components)
 
     idf.save()
     idd = os.path.join(IDD_FILES,'Energy+V8_1_0.idd')
     diagram = LoopDiagram('myVAVSingleDuctReheat.idf', idd)
-    show_graph(idf)
+#    show_graph(idf)
 
 
 def test_make5ZoneAutoDXVAV():
@@ -167,44 +166,52 @@ def test_makeairloop():
         "p_loop",
         ['sb0', ['sb1', 'sb2', 'sb3'], 'sb4'],
         ['db0', ['db1', 'db2', 'db3'], 'db4'],
-        """AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db1DirectAir, , db1 Inlet Node, 
-        autosize;  AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db2DirectAir, , 
-        db2 Inlet Node, autosize;  AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, 
-        db3DirectAir, , db3 Inlet Node, autosize;  ZONEHVAC:EQUIPMENTLIST, 
-        db1 equip list, AirTerminal:SingleDuct:Uncontrolled, db1DirectAir, 1, 
-        1;  ZONEHVAC:EQUIPMENTLIST, db2 equip list, 
-        AirTerminal:SingleDuct:Uncontrolled, db2DirectAir, 1, 1;  
+        """AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db1 Direct Air, , 
+        db1 Direct Air Zone_Supply_Air;  AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, 
+        db2 Direct Air, , db2 Direct Air Zone_Supply_Air;  
+        AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db3 Direct Air, , 
+        db3 Direct Air Zone_Supply_Air;  ZONEHVAC:EQUIPMENTLIST, db1 equip list,
+        AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db1 Direct Air;  
+        ZONEHVAC:EQUIPMENTLIST, db2 equip list, 
+        AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db2 Direct Air;  
         ZONEHVAC:EQUIPMENTLIST, db3 equip list, 
-        AirTerminal:SingleDuct:Uncontrolled, db3DirectAir, 1, 1;  
-        ZONEHVAC:EQUIPMENTCONNECTIONS, db1, db1 equip list, db1 Inlet Node, , 
-        db1 Node, db1 Outlet Node;  ZONEHVAC:EQUIPMENTCONNECTIONS, db2, 
-        db2 equip list, db2 Inlet Node, , db2 Node, db2 Outlet Node;  
-        ZONEHVAC:EQUIPMENTCONNECTIONS, db3, db3 equip list, db3 Inlet Node, , 
-        db3 Node, db3 Outlet Node;  AIRLOOPHVAC, p_loop, , , 0, p_loop Branchs, 
-        p_loop Connectors, p_loop Supply Side Inlet, p_loop Demand Outlet, 
-        p_loop Demand Inlet, p_loop Supply Side Outlet;  
-        AIRLOOPHVAC:ZONESPLITTER, p_loop Demand Side Splitter, 
-        p_loop Demand Inlet, db1 Inlet Node, db2 Inlet Node, db3 Inlet Node;  
-        AIRLOOPHVAC:SUPPLYPATH, p_loopSupplyPath, p_loop Demand Inlet, 
-        AirLoopHVAC:ZoneSplitter, p_loop Demand Side Splitter;  
-        AIRLOOPHVAC:ZONEMIXER, p_loop Demand Side Mixer, p_loop Demand Outlet, 
-        db1 Outlet Node, db2 Outlet Node, db3 Outlet Node;  
-        AIRLOOPHVAC:RETURNPATH, p_loopReturnPath, p_loop Demand Outlet, 
-        AirLoopHVAC:ZoneMixer, p_loop Demand Side Mixer;  BRANCH, sb0, 0, , 
-        duct, sb0_duct, sb0_duct_inlet, sb0_duct_outlet, Bypass;  
-        BRANCH, sb1, 0, , duct, sb1_duct, sb1_duct_inlet, 
-        sb1_duct_outlet, Bypass;  BRANCH, sb2, 0, , duct, sb2_duct, 
-        sb2_duct_inlet, sb2_duct_outlet, Bypass;  BRANCH, sb3, 0, , 
-        duct, sb3_duct, sb3_duct_inlet, sb3_duct_outlet, Bypass;  
-        BRANCH, sb4, 0, , duct, sb4_duct, sb4_duct_inlet, 
-        sb4_duct_outlet, Bypass;  BRANCHLIST, p_loop Branchs, sb0, sb1, sb2, 
-        sb3, sb4;  CONNECTORLIST, p_loop Connectors, Connector:Splitter,
+        AIRTERMINAL:SINGLEDUCT:UNCONTROLLED, db3 Direct Air;  
+        ZONEHVAC:EQUIPMENTCONNECTIONS, db1, db1 equip list, 
+        db1 zone inlet nodes, , db1 Node, db1 Outlet Node;  
+        ZONEHVAC:EQUIPMENTCONNECTIONS, db2, db2 equip list, 
+        db2 zone inlet nodes, , db2 Node, db2 Outlet Node;  
+        ZONEHVAC:EQUIPMENTCONNECTIONS, db3, db3 equip list, 
+        db3 zone inlet nodes, , db3 Node, db3 Outlet Node;  AIRLOOPHVAC, 
+        p_loop, , , 0, p_loop Branchs, p_loop Connectors, 
+        p_loop Supply Side Inlet, p_loop Demand Outlet, p_loop Demand Inlet, 
+        p_loop Supply Side Outlet;  AIRLOOPHVAC:ZONESPLITTER, 
+        p_loop Demand Side Splitter, p_loop Demand Inlet, 
+        db1 Direct Air Zone_Supply_Air, db2 Direct Air Zone_Supply_Air, 
+        db3 Direct Air Zone_Supply_Air;  AIRLOOPHVAC:SUPPLYPATH, 
+        p_loopSupplyPath, p_loop Demand Inlet, AirLoopHVAC:ZoneSplitter, 
+        p_loop Demand Side Splitter;  AIRLOOPHVAC:ZONEMIXER, 
+        p_loop Demand Side Mixer, p_loop Demand Outlet, db1 Outlet Node, 
+        db2 Outlet Node, db3 Outlet Node;  AIRLOOPHVAC:RETURNPATH, 
+        p_loopReturnPath, p_loop Demand Outlet, AirLoopHVAC:ZoneMixer, 
+        p_loop Demand Side Mixer;  BRANCH, sb0, 0, , duct, sb0_duct, 
+        sb0_duct_inlet, sb0_duct_outlet, Bypass;  BRANCH, sb1, 0, , duct, 
+        sb1_duct, sb1_duct_inlet, sb1_duct_outlet, Bypass;  BRANCH, sb2, 0, , 
+        duct, sb2_duct, sb2_duct_inlet, sb2_duct_outlet, Bypass;  BRANCH, sb3, 
+        0, , duct, sb3_duct, sb3_duct_inlet, sb3_duct_outlet, Bypass;  BRANCH, 
+        sb4, 0, , duct, sb4_duct, sb4_duct_inlet, sb4_duct_outlet, Bypass;  
+        BRANCHLIST, p_loop Branchs, sb0, sb1, sb2, sb3, sb4;  
+        CONNECTOR:SPLITTER, p_loop_supply_splitter, sb0, sb1, sb2, sb3;  
+        CONNECTOR:MIXER, p_loop_supply_mixer, sb4, sb1, sb2, sb3;  
+        CONNECTORLIST, p_loop Connectors, Connector:Splitter, 
         p_loop_supply_splitter, Connector:Mixer, p_loop_supply_mixer;  
-        PIPE:ADIABATIC, sb0_pipe, sb0_pipe_inlet, sb0_pipe_outlet;  
-        PIPE:ADIABATIC, sb1_pipe, sb1_pipe_inlet, sb1_pipe_outlet;  
-        PIPE:ADIABATIC, sb2_duct, sb2_duct_inlet, sb2_duct_outlet;  
-        PIPE:ADIABATIC, sb3_duct, sb3_duct_inlet, sb3_duct_outlet;  
-        PIPE:ADIABATIC, sb4_duct, sb4_duct_inlet, sb4_duct_outlet; """
+        NODELIST, db1 zone inlet nodes, db1 Direct Air Zone_Supply_Air;  
+        NODELIST, db2 zone inlet nodes, db2 Direct Air Zone_Supply_Air;  
+        NODELIST, db3 zone inlet nodes, db3 Direct Air Zone_Supply_Air;  DUCT, 
+        sb0_duct, sb0_duct_inlet, sb0_duct_outlet;  DUCT, sb1_duct, 
+        sb1_duct_inlet, sb1_duct_outlet;  DUCT, sb2_duct, sb2_duct_inlet, 
+        sb2_duct_outlet;  DUCT, sb3_duct, sb3_duct_inlet, sb3_duct_outlet;  
+        DUCT, sb4_duct, sb4_duct_inlet, sb4_duct_outlet;  
+        """
     ) # loopname, sloop, dloop, expected
 
     loopname, sloop, dloop, expected = tdata
@@ -214,6 +221,10 @@ def test_makeairloop():
     idf2 = IDF(StringIO(expected))
     result = idf1.idfstr()
     expected = idf2.idfstr()
+#    show_graph(idf1)
+#    idf1.outputtype = 'compressed'
+#    idf1.printidf()
+#    show_graph(idf2)
     assert result == expected
     
 
@@ -225,7 +236,7 @@ def test_makeplantloop():
         ['db0', ['db1', 'db2', 'db3'], 'db4'],
         """BRANCH, sb0, 0, , Pipe:Adiabatic, sb0_pipe, p_loop Supply Inlet, 
         sb0_pipe_outlet, Bypass;  BRANCH, sb1, 0, , Pipe:Adiabatic, sb1_pipe, 
-        sb1_pipe_inlet, sb1_duct_outlet, Bypass;  BRANCH, sb2, 0, , 
+        sb1_pipe_inlet, sb1_pipe_outlet, Bypass;  BRANCH, sb2, 0, , 
         Pipe:Adiabatic, sb2_pipe, sb2_pipe_inlet, sb2_pipe_outlet, Bypass;  
         BRANCH, sb3, 0, , Pipe:Adiabatic, sb3_pipe, sb3_pipe_inlet, 
         sb3_pipe_outlet, Bypass;  BRANCH, sb4, 0, , Pipe:Adiabatic, sb4_pipe, 
@@ -247,7 +258,7 @@ def test_makeplantloop():
         CONNECTORLIST, p_loop Demand Connectors, Connector:Splitter, 
         p_loop_demand_splitter, Connector:Mixer, p_loop_demand_mixer;  
         PIPE:ADIABATIC, sb0_pipe, p_loop Supply Inlet, sb0_pipe_outlet;  
-        PIPE:ADIABATIC, sb1_duct, sb1_duct_inlet, sb1_duct_outlet;  
+        PIPE:ADIABATIC, sb1_pipe, sb1_pipe_inlet, sb1_pipe_outlet;  
         PIPE:ADIABATIC, sb2_pipe, sb2_pipe_inlet, sb2_pipe_outlet;  
         PIPE:ADIABATIC, sb3_pipe, sb3_pipe_inlet, sb3_pipe_outlet;  
         PIPE:ADIABATIC, sb4_pipe, sb4_pipe_inlet, p_loop Supply Outlet;  
@@ -259,7 +270,7 @@ def test_makeplantloop():
         PLANTLOOP, p_loop, Water, , , , , , , 0.0, Autocalculate, 
         p_loop Supply Inlet, p_loop Supply Outlet, p_loop Supply Branchs, 
         p_loop Supply Connectors, p_loop Demand Inlet, p_loop Demand Outlet, 
-        p_loop Demand Branchs, p_loop Demand Connectors, Sequential, , 
+        p_loop Demand Branchs, p_loop Demand Connectors, SequentialLoad, , 
         SingleSetpoint, None, None; """
     ) # loopname, sloop, dloop, expected
 
@@ -318,7 +329,7 @@ def test_makecondenserloop():
         c_loop Cond_Supply Outlet, c_loop Cond_Supply Branchs,
         c_loop Cond_Supply Connectors, c_loop Demand Inlet,
         c_loop Demand Outlet, c_loop Condenser Demand Branchs,
-        c_loop Condenser Demand Connectors, Sequential, None;  """
+        c_loop Condenser Demand Connectors, SequentialLoad, None;  """
         ) # loopname, sloop, dloop, expected
 
     loopname, sloop, dloop, expected = tdata

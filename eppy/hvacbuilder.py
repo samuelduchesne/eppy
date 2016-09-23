@@ -24,6 +24,121 @@ import eppy.modeleditor as modeleditor
 class WhichLoopError(Exception):
     pass
 
+"""
+A mapping from zone equipment objects to node names that should appear in 
+specific locations in the IDF.
+"""
+
+connections = {
+    u'WATERHEATER:HEATPUMP:PUMPEDCONDENSER': {
+        u'ExhaustNode': [u'Air_Inlet_Node_Name'],
+        u'OutdoorNode': [u'Outdoor_Air_Node_Name'],
+        u'ZoneInlets': [u'Air_Outlet_Node_Name']},
+    u'ZONEHVAC:EVAPORATIVECOOLERUNIT': {
+        u'ExhaustNode': [u'Zone_Relief_Air_Node_Name'],
+        u'OutdoorNode': [u'Outdoor_Air_Inlet_Node_Name'],
+        u'ZoneInlets': [u'Cooler_Outlet_Node_Name']},
+    u'ZONEHVAC:OUTDOORAIRUNIT': {
+        u'ExhaustNode': [u'AirInlet_Node_Name'],
+        u'OutdoorNode': [u'Outdoor_Air_Node_Name'],
+        u'ZoneInlets': [u'AirOutlet_Node_Name']},
+    u'AIRTERMINAL:DUALDUCT:VAV:OUTDOORAIR': {
+        u'ZoneSplitter': [u'Outdoor_Air_Inlet_Node_Name'],
+        u'ZoneInlets': [u'Air_Outlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT:VARIABLESPEEDFAN': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:VAV:HEATANDCOOL:REHEAT': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'ZONEHVAC:UNITVENTILATOR': {
+        u'ExhaustNode': [u'Air_Inlet_Node_Name'],
+        u'OutdoorNode': [u'Outdoor_Air_Node_Name'],
+        u'ZoneInlets': [u'Air_Outlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:CONSTANTVOLUME:COOLEDBEAM': {
+        u'ZoneInlets': [u'Supply_Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Supply_Air_Inlet_Node_Name']},
+    u'ZONEHVAC:REFRIGERATIONCHILLERSET': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'ZONEHVAC:IDEALLOADSAIRSYSTEM': {
+        u'ExhaustNode': [u'Zone_Exhaust_Air_Node_Name'],
+        u'ZoneInlets': [u'Zone_Supply_Air_Node_Name']},
+    u'ZONEHVAC:FOURPIPEFANCOIL': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'ZONEHVAC:AIRDISTRIBUTIONUNIT': {
+        u'ZoneInlets': [u'Air_Dist_Unit_Outlet_Node_Name']},
+    u'ZONEHVAC:PACKAGEDTERMINALHEATPUMP': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:VAV:HEATANDCOOL:NOREHEAT': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'FAN:ZONEEXHAUST': {
+        u'ExhaustNode': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:VAV:REHEAT': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:PARALLELPIU:REHEAT': {
+        u'ExhaustNode': [u'Secondary_Air_Inlet_Node_Name'],
+        u'ZoneInlets': [u'Outlet_Node_Name'],
+        u'ZoneMixer': [u'Supply_Air_Inlet_Node_Name'],
+        u'ZoneSplitter': [u'Supply_Air_Inlet_Node_Name']},
+    u'WATERHEATER:HEATPUMP:WRAPPEDCONDENSER': {
+        u'ExhaustNode': [u'Air_Inlet_Node_Name'],
+        u'OutdoorNode': [u'Outdoor_Air_Node_Name'],
+        u'ZoneInlets': [u'Air_Outlet_Node_Name']},
+    u'ZONEHVAC:PACKAGEDTERMINALAIRCONDITIONER': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'ZONEHVAC:UNITHEATER': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:UNCONTROLLED': {
+        u'ZoneInlets': [u'Zone_Supply_Air_Node_Name'],
+        u'ZoneSplitter': [u'Zone_Supply_Air_Node_Name']},
+    u'AIRTERMINAL:DUALDUCT:VAV': {
+        u'ZoneSplitter': [u'Hot_Air_Inlet_Node_Name', u'Cold_Air_Inlet_Node_Name'],
+        u'ZoneInlets': [u'Air_Outlet_Node_Name']},
+    u'ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW': {
+        u'ZoneInlets': [u'Terminal_Unit_Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Terminal_Unit_Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:CONSTANTVOLUME:REHEAT': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'ZONEHVAC:VENTILATEDSLAB': {
+        u'OutdoorNode': [u'Outdoor_Air_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:SERIESPIU:REHEAT': {
+        u'ExhaustNode': [u'Secondary_Air_Inlet_Node_Name'],
+        u'ZoneInlets': [u'Outlet_Node_Name'],
+        u'ZoneMixer': [u'Supply_Air_Inlet_Node_Name'],
+        u'ZoneSplitter': [u'Supply_Air_Inlet_Node_Name']},
+    u'ZONEHVAC:DEHUMIDIFIER:DX': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:USERDEFINED': {
+        u'ZoneInlets': [u'Primary_Air_Outlet_Node_Name', u'Secondary_Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Primary_Air_Inlet_Node_Name', u'Secondary_Air_Inlet_Node_Name']},
+    u'ZONEHVAC:WATERTOAIRHEATPUMP': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'ZONEHVAC:WINDOWAIRCONDITIONER': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:VAV:NOREHEAT': {
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:SINGLEDUCT:CONSTANTVOLUME:FOURPIPEINDUCTION': {
+        u'ExhaustNode': [u'Induced_Air_Inlet_Node_Name'],
+        u'ZoneInlets': [u'Air_Outlet_Node_Name'],
+        u'ZoneMixer': [u'Supply_Air_Inlet_Node_Name', u'Air_Outlet_Node_Name'],
+        u'ZoneSplitter': [u'Supply_Air_Inlet_Node_Name']},
+    u'AIRTERMINAL:DUALDUCT:CONSTANTVOLUME': {
+        u'ZoneSplitter': [u'Hot_Air_Inlet_Node_Name', u'Cold_Air_Inlet_Node_Name'],
+        u'ZoneInlets': [u'Air_Outlet_Node_Name']}
+    }
+
 
 def makeplantloop(idf, loopname, sloop, dloop):
     """Make plant loop with pipe components.
@@ -546,47 +661,14 @@ class AirLoopHVAC(Loop):
         """
         self.d_branches = []  # this is intentionally set as an empty list
         _inlet, zones, _outlet = self.dloop
-        #ZoneHVAC:EquipmentConnections
+
         for zone in zones:
-            equipconn = self.idf.newidfobject("ZONEHVAC:EQUIPMENTCONNECTIONS")
-            equipconn.Zone_Name = zone
-            fldname = "Zone_Conditioning_Equipment_List_Name"
-            equipconn[fldname] = "%s equip list" % (zone, )
-            fldname = "Zone_Air_Inlet_Node_or_NodeList_Name"
-            equipconn[fldname] = "%s Inlet Node" % (zone, )
-            fldname = "Zone_Air_Node_Name"
-            equipconn[fldname] = "%s Node" % (zone, )
-            fldname = "Zone_Return_Air_Node_Name"
-            equipconn[fldname] = "%s Outlet Node" % (zone, )
-        
-        # make ZoneHVAC:EquipmentList
-        for zone in zones:
-            z_equiplst = self.idf.newidfobject("ZONEHVAC:EQUIPMENTLIST")
-            z_equipconn = modeleditor.getobjects(
-                self.idf.idfobjects, self.idf.model, self.idf.idd_info, 
-                "ZONEHVAC:EQUIPMENTCONNECTIONS",
-                **dict(Zone_Name=zone))[0]
-            z_equiplst.Name = z_equipconn.Zone_Conditioning_Equipment_List_Name
-            fld = "Zone_Equipment_1_Object_Type"
-            z_equiplst[fld] = "AirTerminal:SingleDuct:Uncontrolled"
-            z_equiplst.Zone_Equipment_1_Name = "%sDirectAir" % (zone, )
-            z_equiplst.Zone_Equipment_1_Cooling_Sequence = 1
-            z_equiplst.Zone_Equipment_1_Heating_or_NoLoad_Sequence = 1
-        
-        # make AirTerminal:SingleDuct:Uncontrolled
-        for zone in zones:
-            z_equipconn = modeleditor.getobjects(
-                self.idf.idfobjects, self.idf.model, self.idf.idd_info, 
-                "ZONEHVAC:EQUIPMENTCONNECTIONS", #places=7,
-                **dict(Zone_Name=zone))[0]
-            key = "AIRTERMINAL:SINGLEDUCT:UNCONTROLLED"
-            z_airterm = self.idf.newidfobject(key)
-            z_airterm.Name = "%sDirectAir" % (zone, )
-            fld1 = "Zone_Supply_Air_Node_Name"
-            fld2 = "Zone_Air_Inlet_Node_or_NodeList_Name"
-            z_airterm[fld1] = z_equipconn[fld2]
-            z_airterm.Maximum_Air_Flow_Rate = 'autosize'
-    
+            terminal = self.idf.newidfobject(
+                "AIRTERMINAL:SINGLEDUCT:UNCONTROLLED",
+                '%s Direct Air' % zone)
+            self.make_zoneequipment(
+                zone, [terminal])
+
     def rename_endpoints(self):
         """Not implemented for AirLoopHVAC.
         """
@@ -609,11 +691,13 @@ class AirLoopHVAC(Loop):
     
     def make_splitters_and_mixers(self):
         """
-        Make zone splitter and zone mixer objects for supply and demand sides
-        of the loop, add them to the supply and demand connector lists, and
-        make supply and return path objects.
+        Make supply side splitter and mixer objects.
+        Make demand side zone splitter and zone mixer objects.
+        Add them to the supply and demand connector lists, and make supply and
+        return path objects.
         
         """
+        # supply side
         supply_splitter = self.idf.newidfobject(
             "CONNECTOR:SPLITTER", 
             self.s_connlist.Connector_1_Name)
@@ -623,18 +707,12 @@ class AirLoopHVAC(Loop):
             self.s_connlist.Connector_2_Name)
         supply_mixer.obj.extend([self.sloop[-1]] + self.sloop[1])
     
+        # demand side
         _inlet, zones, _outlet = self.dloop
         # make AirLoopHVAC:ZoneSplitter
-        z_splitter = self.idf.newidfobject("AIRLOOPHVAC:ZONESPLITTER")
-        z_splitter.Name = "%s Demand Side Splitter" % self.Name
+        z_splitter = self.idf.getmakeidfobject(
+            "AIRLOOPHVAC:ZONESPLITTER", "%s Demand Side Splitter" % self.Name)
         z_splitter.Inlet_Node_Name = self.Demand_Side_Inlet_Node_Names
-        for i, zone in enumerate(zones):
-            z_equipconn = modeleditor.getobjects(
-                self.idf.idfobjects, self.idf.model, self.idf.idd_info, 
-                "ZONEHVAC:EQUIPMENTCONNECTIONS",
-                **dict(Zone_Name=zone))[0]
-            fld = "Outlet_%s_Node_Name" % (i + 1, )
-            z_splitter[fld] = z_equipconn.Zone_Air_Inlet_Node_or_NodeList_Name
         self.zone_splitter = z_splitter
         # make AirLoopHVAC:SupplyPath
         z_supplypth = self.idf.newidfobject("AIRLOOPHVAC:SUPPLYPATH")
@@ -646,13 +724,13 @@ class AirLoopHVAC(Loop):
         z_supplypth.Component_1_Name = z_splitter.Name
         
         # make AirLoopHVAC:ZoneMixer
-        z_mixer = self.idf.newidfobject("AIRLOOPHVAC:ZONEMIXER")
-        z_mixer.Name = "%s Demand Side Mixer" % self.Name
+        z_mixer = self.idf.getmakeidfobject(
+            "AIRLOOPHVAC:ZONEMIXER", "%s Demand Side Mixer" % self.Name)
         z_mixer.Outlet_Node_Name = self.Demand_Side_Outlet_Node_Name
         for i, zone in enumerate(zones):
             z_equipconn = modeleditor.getobjects(
                 self.idf.idfobjects, self.idf.model, self.idf.idd_info, 
-                "ZONEHVAC:EQUIPMENTCONNECTIONS", #places=7,
+                "ZONEHVAC:EQUIPMENTCONNECTIONS",
                 **dict(Zone_Name=zone))[0]
             fld = "Inlet_%s_Node_Name" % (i + 1, )
             z_mixer[fld] = z_equipconn.Zone_Return_Air_Node_Name
@@ -667,82 +745,134 @@ class AirLoopHVAC(Loop):
         z_returnpth.Component_1_Object_Type = "AirLoopHVAC:ZoneMixer"
         z_returnpth.Component_1_Name = z_mixer.Name
     
-    def replace_zoneequipment(self, zone, terminal_type, components):
+    def replace_zoneequipment(self, zone, components):
         """Replace zone equipment for a zone.
         
         Parameters
         ----------
         zone : str
             Name of the zone.
-        terminal_type : str
-            EnergyPlus object type, e.g. "AirTerminal:SingleDuct:ConstantVolume:Reheat".
-        components : list of tuples
-            These are for each item of equipment in the zone.
-            Tuples are in the form:
-            example: [(coil, 'Damper_Air_Outlet', '')]
+        components : list
+            A list of EpBunch objects representing Zone Equipment.
 
         """
         self.remove_zoneequipment(zone)
-        self.make_zoneequipment(zone, terminal_type, components)
+        self.make_zoneequipment(zone, components)
 
-    def make_zoneequipment(self, zone, terminal_type, components):
+    def name_component_nodes(self, components):
+        """Name all component nodes (if not already named).
+        
+        Parameters
+        ----------
+        components : list
+            List of EpBunch objects representing zone equipment.
+            
+        """
+        for component in components:
+            nodes = getfieldnamesendswith(component, 'Node_Name')
+            for node in nodes:
+                if component[node] == '':
+                    component[node] = '%s %s' % (
+                        component.Name, node.replace('_Node_Name', ''))
+
+    def make_zoneequipment(self, zone, components):
         """Create the equipment for a zone.
         
         Parameters
         ----------
         zone : str
             Name of the zone.
-        terminal_type : str
-            EnergyPlus object type, e.g. "AirTerminal:SingleDuct:ConstantVolume:Reheat".
-        components : list of tuples
-            These are for each item of equipment in the zone.
-            Tuples are in the form:
-            example: [(coil, 'Damper_Air_Outlet', '')]
-
+        components : list
+            A list of EpBunch objects representing Zone Equipment.
+            
         """
         idf = self.idf
         # name the inlets and outlets
-        for component_tuple in components:
-            component = component_tuple[0]
-            inlets = getfieldnamesendswith(component, 'Inlet_Node_Name')
-            outlets = getfieldnamesendswith(component, 'Outlet_Node_Name')
-            for inlet in inlets:
-                component[inlet] = '%s %s' % (
-                    component.Name, inlet.replace('_Node_Name', ''))
-            for outlet in outlets:
-                component[outlet] = '%s %s' % (
-                    component.Name, outlet.replace('_Node_Name', ''))
-        
-        # air terminal
-        terminal = idf.newidfobject(
-            terminal_type.upper(), "%s air terminal" % zone)
-        self.set_terminal_nodes(terminal, zone, components)
-        # air distribution unit
-        adu = idf.newidfobject(
-            'ZONEHVAC:AIRDISTRIBUTIONUNIT', '%s air distribution unit' % zone,
-            Air_Distribution_Unit_Outlet_Node_Name=terminal.Air_Outlet_Node_Name,
-            Air_Terminal_Object_Type=terminal.key,
-            Air_Terminal_Name="%s air terminal" % zone)
-        
-        # equipment list
-        equipment_list = idf.newidfobject(
-            "ZONEHVAC:EQUIPMENTLIST", "%s equip list" % zone)
-        equipment_list.Zone_Equipment_1_Object_Type = adu.key
-        equipment_list.Zone_Equipment_1_Name = adu.Name
-        
-        # zone nodes
-        idf.getmakeidfobject(
-            'NODELIST', "%s inlet nodes" % zone,
-            Node_1_Name=terminal.Air_Outlet_Node_Name)
-        
+        self.name_component_nodes(components)
+    
+        # handle the components
+        equipment_list_components = []
+        for component in components:
+            nodes = connections[component.key.upper()]
+            if component.key.upper() == 'AIRTERMINAL:SINGLEDUCT:UNCONTROLLED':
+                # no need for a ZONEHVAC:AIRDISTRIBUTIONUNIT
+                equipment_list_components.append(component)                
+            elif component.key.startswith('AIRTERMINAL'):
+                # needs a ZONEHVAC:AIRDISTRIBUTIONUNIT
+                fld = nodes['ZoneInlets'][0]
+                # air distribution unit
+                adu = idf.newidfobject(
+                    'ZONEHVAC:AIRDISTRIBUTIONUNIT', 
+                    '%s air distribution unit' % zone,
+                    Air_Distribution_Unit_Outlet_Node_Name=component[fld],
+                    Air_Terminal_Object_Type=component.key,
+                    Air_Terminal_Name=component.Name)
+                equipment_list_components.append(adu)
+            else:
+                equipment_list_components.append(component)
+    
         # equipment connections
         conns = idf.newidfobject("ZONEHVAC:EQUIPMENTCONNECTIONS")
         conns.Zone_Name = zone
-        conns.Zone_Conditioning_Equipment_List_Name="%s equip list" % zone
-        conns.Zone_Air_Inlet_Node_or_NodeList_Name="%s inlet nodes" % zone
         conns.Zone_Air_Node_Name="%s Node" % zone
         conns.Zone_Return_Air_Node_Name="%s Outlet Node" % zone
 
+        # zone inlet nodes list
+        inlet_nodes = []
+        for component in components:
+            nodes = connections[component.key.upper()]
+            if nodes.get('ZoneInlets', None):
+                node = nodes['ZoneInlets'][0]
+                inlet_nodes.append(component[node])
+        if inlet_nodes:
+            inlet_list_name = '%s zone inlet nodes' % zone
+            inlet_nodelist = idf.getmakeidfobject('NODELIST', inlet_list_name)
+            for node in inlet_nodes:
+                inlet_nodelist.fieldvalues.append(node)
+            conns.Zone_Air_Inlet_Node_or_NodeList_Name = inlet_list_name
+            conns.Zone_Air_Inlet_Node_or_NodeList_Name = inlet_list_name
+            
+        # exhaust nodes list
+        exhaust_nodes = []
+        for component in components:
+            nodes = connections[component.key.upper()]
+            if nodes.get('ExhaustNode', None):
+                node = nodes['ExhaustNode'][0]
+                exhaust_nodes.append(component[node])
+        if exhaust_nodes:
+            exhaust_list_name = '%s exhaust nodes' % zone
+            exhaust_nodelist = idf.newidfobject('NODELIST', exhaust_list_name)
+            for node in exhaust_nodes:
+                exhaust_nodelist.fieldvalues.append(node)
+            conns.Zone_Air_Exhaust_Node_or_NodeList_Name = exhaust_list_name
+            
+        # equipment list
+        equiplist_name = "%s equip list" % zone
+        equipment_list = idf.newidfobject(
+            "ZONEHVAC:EQUIPMENTLIST", equiplist_name)
+        for i, component in enumerate(equipment_list_components, 1):
+            nodes = connections[component.key.upper()]
+            equipment_list['Zone_Equipment_%i_Object_Type' % i] = component.key
+            equipment_list['Zone_Equipment_%i_Name' % i] = component.Name
+        conns.Zone_Conditioning_Equipment_List_Name = equiplist_name
+
+        
+        # connect to ZoneSplitter
+        splitter_nodes = []
+        for component in components:
+            nodes = connections[component.key.upper()]
+            if nodes.get('ZoneSplitter', None):
+                node = nodes['ZoneSplitter'][0]
+                splitter_nodes.append(component[node])
+        if splitter_nodes:
+            z_splitter = self.idf.getmakeidfobject(
+                "AIRLOOPHVAC:ZONESPLITTER",
+                "%s Demand Side Splitter" % self.Name)
+            z_splitter.Inlet_Node_Name = self.Demand_Side_Inlet_Node_Names
+            for node in splitter_nodes:
+                if node not in z_splitter.fieldvalues:
+                    z_splitter.fieldvalues.append(node)
+            
     def remove_zoneequipment(self, zone):
         """Remove the zone equipment from a zone.
         
@@ -752,10 +882,12 @@ class AirLoopHVAC(Loop):
         
         """
         idf = self.idf
-        equipment_list = idf.getobject(
-            'ZONEHVAC:EQUIPMENTLIST', '%s equip list' % zone)
-        connections = idf.getobject("ZONEHVAC:EQUIPMENTCONNECTIONS", zone)
-        idf.removeidfobject(connections)
+        # get the connections object to find objects to remove
+        zone_connections = idf.getobject("ZONEHVAC:EQUIPMENTCONNECTIONS", zone)
+        # get the equipment list to find components to remove
+        equipment_list = zone_connections.Zone_Conditioning_Equipment_List_Name
+        equipment_list = idf.getobject('ZONEHVAC:EQUIPMENTLIST', equipment_list)
+        # remove components
         for i in range(1, 100000):
             ctypefld = 'Zone_Equipment_%s_Object_Type' % i
             cnamefld = 'Zone_Equipment_%s_Name' % i
@@ -764,47 +896,39 @@ class AirLoopHVAC(Loop):
             if cname == '':
                 break
             component = idf.getobject(ctype, cname)
+            if ctype == "ZONEHVAC:AIRDISTRIBUTIONUNIT":
+                ttype = component.Air_Terminal_Object_Type
+                tname =  component.Air_Terminal_Name
+                terminal = idf.getobject(ttype, tname)
+                idf.removeidfobject(terminal)
             idf.removeidfobject(component)
-        idf.removeidfobject(equipment_list)
-
-    def set_terminal_nodes(self, terminal, zone, components):
-        """Calculate and set a terminal's node names.
-        """      
-        # Air Outlet
-        # value is the same as last component's air outlet value
-        last, _c_in, _c_out = components[-1]
-        outlet_fld = getnodefieldname(last, endswith='Outlet_Node_Name', fluid='air')
-        air_outlet_node = last[outlet_fld]
-        # now the terminal's air outlet field
-        fld = 'Air_Outlet_Node_Name'  # TODO: Find this
-        terminal[fld] = air_outlet_node
+                
+        # remove zone inlet nodes list
+        inlet_nodes = zone_connections.Zone_Air_Inlet_Node_or_NodeList_Name
+        try:
+            inlet_nodes = idf.getobject('NODELIST', inlet_nodes)
+            # remove references to zone from ZoneSplitter
+            z_splitter = self.idf.getmakeidfobject(
+                "AIRLOOPHVAC:ZONESPLITTER", 
+                "%s Demand Side Splitter" % self.Name)
+            inlet_node_names = inlet_nodes.fieldvalues[2:]
+            z_splitter.obj = [
+                v for v in z_splitter.obj if v not in inlet_node_names]
+            idf.removeidfobject(inlet_nodes)
+        except AttributeError as e:
+            pass
+        # remove zone exhaust nodes list
+        exhaust_nodes = zone_connections.Zone_Air_Exhaust_Node_or_NodeList_Name
+        try:
+            exhaust_nodes = idf.getobject('NODELIST', exhaust_nodes)
+            idf.removeidfobject(exhaust_nodes)
+        except AttributeError:
+            pass
+        # remove other objects
+        idf.removeidfobject(equipment_list)        
+        idf.removeidfobject(zone_connections)
+        pass
         
-        # Air Inlet
-        # air inlet is the same as the one for the zone on the ZoneSplitter object
-        air_inlet_node = "%s Inlet Node" % zone
-        # now the terminal's air outlet field
-        fld = 'Air_Inlet_Node_Name'  # TODO: Find this
-        terminal[fld] = air_inlet_node
-        
-        for component, c_in, c_out in components:
-            # c_in: prefix of the terminal node that the component inlet joins
-            # c_out: prefix of the terminal node that the component outlet joins
-            terminal_node_name = getnodefieldname(
-                terminal, endswith='Node_Name', startswith=c_in)
-            component_node_name = getnodefieldname(
-                terminal, endswith='Inlet_Node_Name', fluid='air')
-            component_node_value = component[component_node_name]
-            terminal[terminal_node_name] = component_node_value
-            if c_out:
-                terminal_node_name = getnodefieldname(
-                    terminal, endswith='Node_Name', startswith=c_out)
-                component_node_name = getnodefieldname(
-                    terminal, endswith='Outlet_Node_Name')
-                component_node_value = component[component_node_name]
-                terminal[terminal_node_name] = component_node_value
-    
-    
-
     
 def pipebranch(idf, branchname):
     """Make a branch with a pipe using standard inlet and outlet names.
