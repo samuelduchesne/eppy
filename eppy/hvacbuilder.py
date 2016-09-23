@@ -1070,7 +1070,7 @@ def getbranchcomponents(idf, branch, utest=False):
         return [idf.getobject(ot.upper(), on) for ot, on in complist]
 
 
-def getzoneequipment(idf, zone, utest=False):
+def getzoneequipment(idf, zone):
     """Get the equipment in a zone.
     
     Parameters
@@ -1079,8 +1079,6 @@ def getzoneequipment(idf, zone, utest=False):
         The IDF.
     zone : EpBunch
         The zone to look in.
-    utest : bool
-        Flag whether we are in a unit test.
     
     Returns
     -------
@@ -1102,9 +1100,6 @@ def getzoneequipment(idf, zone, utest=False):
             # TODO: unit test
             # When should this be triggered?
             break
-    if utest:
-        return complist
-    else:
         return [idf.getobject(ot.upper(), on) for ot, on in complist]
 
 
@@ -1256,8 +1251,8 @@ def initinletoutlet(idf, idfobject, nodeprefix, force=False):
         The IDF.
     idfobject : EpBunch
         The object to have nodes renamed.
-    thisnode : str
-        ??
+    nodeprefix : str
+        Prefix for a specifc node or nodes to rename, e.g. 'Water_'. 
     force : bool
         If force is False, inlet and outlet node names will only be set if the
         field is empty.
