@@ -238,7 +238,7 @@ def test_iddofobject():
                 u'group': u'Simulation Parameters', 
                 'format': ['singleLine'], 'unique-object': ['']},
                 {
-                    'default': ['7.0'], 'field': ['Version Identifier'],
+                    'default': ['8.5'], 'field': ['Version Identifier'],
                     'required-field': ['']
                 }
             ]
