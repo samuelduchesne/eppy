@@ -544,8 +544,7 @@ def test_refname2key():
             'AllCurves',
             [u'EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL', 
              u'EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL', 
-             u'ENERGYMANAGEMENTSYSTEM:CURVEORTABLEINDEXVARIABLE']
-,
+             u'ENERGYMANAGEMENTSYSTEM:CURVEORTABLEINDEXVARIABLE'],
         ),  # refname, key
     )
     for refname, key in tdata:
