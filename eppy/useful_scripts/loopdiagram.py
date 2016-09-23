@@ -256,7 +256,7 @@ class AirLoop(object):
         for equipconnection in equipconnections:
             zonename = equipconnection[0]
             returnnode = equipconnection[-1]
-            edges.append((zonename, (returnnode)))
+            edges.append((zonename, (returnnode, 'epnode')))
         
         # connect equips to room
         equipmentlist = loops.equipmentlistfields(self.data, self.commdct)
