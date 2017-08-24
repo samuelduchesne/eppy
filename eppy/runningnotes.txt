@@ -1,5 +1,9 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2017-08-24
+----------
+- set all test to run on the latest IDD version.
+
 2017-05-25
 ----------
 slash and burn on i116_slashandburn
