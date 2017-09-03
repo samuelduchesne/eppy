@@ -1,5 +1,5 @@
 2015-01-13
-----------
+---------- 
 updated notes on publishing the documentation.
 
 1. main docs
