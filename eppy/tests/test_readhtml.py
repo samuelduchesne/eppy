@@ -14,7 +14,7 @@ from __future__ import unicode_literals
 import collections
 from bs4 import BeautifulSoup
 import eppy.results.readhtml as readhtml
-from eppy.tests.sample_html import sample_html as SAMPLE_HTML
+# from eppy.tests.sample_html import sample_html as SAMPLE_HTML
 
 SAMPLE_HTML = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
 <html>
