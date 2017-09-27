@@ -1,5 +1,10 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2017-09-26
+----------
+for "Adding testing to pip" see
+http://ericholscher.com/blog/2009/nov/5/adding-testing-pip/
+
 2017-05-25
 ----------
 slash and burn on i116_slashandburn
