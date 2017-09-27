@@ -67,6 +67,8 @@ def has_severe_errors(results='run_outputs'):
     return num_severe > 0
 
 
+@pytest.mark.skipif(
+    not do_integration_tests(), reason="$EPPY_INTEGRATION env var not set")
 def test_version_reader():
     """Test that get the expected idd_version when reading an IDF/IDD.
     """
