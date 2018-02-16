@@ -1,5 +1,39 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2018-02-16
+----------
+
+working with issue #186 = Remove unused objects in an idf 
+- need some helper functions to make this easy
+    - ordered list of object names - sugar for - idf.model.dtls
+    
+scratch
+        idf.newidfobject?
+        idf.idd_info
+        type(idf.idd_info)
+        idf.idd_info[0]
+        idf.idd_info[1]
+        idf.idd_info[2]
+        [item['idfobj'] for item in idf.idd_info][:3]
+        [item[0]['idfobj'] for item in idf.idd_info][:3]
+        [item[0]['idfobj'] for item in idf.idd_info].index('Material')
+        idd = idf.idd_info
+        idd[47]
+        materialidd = idd[47]
+        materialidd
+        type(idf.idfobjects)
+        len(idf.idfobjects.keys())
+        idf.idfname
+        type(idf.idfstr)
+        type(idf.idfstr())
+        len(idf.idfstr())
+        idf.idfstr()
+        pritn idf.idfstr()
+        print idf.idfstr()
+        idf.model.dtls[:10]
+        hist
+        
+
 2017-12-12
 ----------
 
