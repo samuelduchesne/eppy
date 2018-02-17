@@ -8,30 +8,85 @@ working with issue #186 = Remove unused objects in an idf
     - ordered list of object names - sugar for - idf.model.dtls
     
 scratch
-        idf.newidfobject?
-        idf.idd_info
-        type(idf.idd_info)
-        idf.idd_info[0]
-        idf.idd_info[1]
-        idf.idd_info[2]
-        [item['idfobj'] for item in idf.idd_info][:3]
-        [item[0]['idfobj'] for item in idf.idd_info][:3]
-        [item[0]['idfobj'] for item in idf.idd_info].index('Material')
-        idd = idf.idd_info
-        idd[47]
-        materialidd = idd[47]
-        materialidd
-        type(idf.idfobjects)
-        len(idf.idfobjects.keys())
-        idf.idfname
-        type(idf.idfstr)
-        type(idf.idfstr())
-        len(idf.idfstr())
-        idf.idfstr()
-        pritn idf.idfstr()
-        print idf.idfstr()
-        idf.model.dtls[:10]
-        hist
+    idf.newidfobject?
+    idf.idd_info
+    type(idf.idd_info)
+    idf.idd_info[0]
+    idf.idd_info[1]
+    idf.idd_info[2]
+    [item['idfobj'] for item in idf.idd_info][:3]
+    [item[0]['idfobj'] for item in idf.idd_info][:3]
+    [item[0]['idfobj'] for item in idf.idd_info].index('Material')
+    idd = idf.idd_info
+    idd[47]
+    materialidd = idd[47]
+    materialidd
+    type(idf.idfobjects)
+    len(idf.idfobjects.keys())
+    idf.idfname
+    type(idf.idfstr)
+    type(idf.idfstr())
+    len(idf.idfstr())
+    idf.idfstr()
+    pritn idf.idfstr()
+    print idf.idfstr()
+    idf.model.dtls[:10]
+    hist
+
+    dtls = idf.model.dtls
+    
+pseudocode:
+
+orphan = list()
+
+for idfobject0 in idfobjects0:
+    if anyfield inidfobject0 idd has key u'reference': #1
+        orphan.append(idfobject0)
+        ref, field = item[u'reference'], item['field']
+        for each of idfobjets:
+            for each idfobject:
+                get objectidd
+                for each field in objectidd:
+                    if object-list = ref:
+                        for idfobject0 in idfobjects0:
+                            if idfobject0[ref] == idfobject[field]:
+                                orphan.remove(idfobject0)
+                
+                
+#1 
+if anyfield inidfobject0 idd has key u'reference':
+objectidd = idd of object
+
+ha! the solution
+
+idfkeys = idf.model.dtls
+for idfkey in idfkeys:
+    for idfobject in idf.idfobjects[idfkey]:
+        for name in idfobject.fieldnames:
+            ref = idfobject.getfieldidd_item(name, u'reference')
+            if ref:
+                print idfobject.fieldvalues[:2]
+                referingobjs = idfobject.getreferingobjs()
+                if referingobjs:
+                    for referingobj in referingobjs:
+                        print '\t refered by:', referingobj.fieldvalues[:2] 
+                else:
+                    print '\t is an orpahn idfobject'
+                    
+for idfkey in idf.idfobjects.keys():
+    for idfobject in idf.idfobjects[idfkey]:
+        for fieldname in idfobject.fieldnames:
+            ref = idfobject.getfieldidd_item(fieldname, u'reference')
+            if ref:
+                print idfobject.fieldvalues[:2]
+                referingobjs = idfobject.getreferingobjs()
+                if referingobjs:
+                    for referingobj in referingobjs:
+                        print '\t refered by:', referingobj.fieldvalues[:2] 
+                else:
+                    print '\t is an orpahn idfobject'
+                    
+
         
 
 2017-12-12
