@@ -73,6 +73,8 @@ for idfkey in idfkeys:
                 else:
                     print '\t is an orpahn idfobject'
                     
+# find orphaned objects
+# objectes that should be referenced, but are not.
 for idfkey in idf.idfobjects.keys():
     for idfobject in idf.idfobjects[idfkey]:
         for fieldname in idfobject.fieldnames:
@@ -86,7 +88,52 @@ for idfkey in idf.idfobjects.keys():
                 else:
                     print '\t is an orpahn idfobject'
                     
+                    
+# find missing references 
+for idfobject in allidfobjects:
+    for each idffield in idffield:
+        if idffield is type object-list:
+            if object field value found in idf:
+                break
+            else:
+                is missing reference                    
 
+# need function to get all idf objects -> idfitems(keys=None)
+# function for all objects from a list of keys -> idfitems(keys=keys)
+
+idfobject.isreference
+    idfobject_isreference
+idfobject.referedby
+    idfobject_referedby
+idfobject.refersto
+    idfobject_refersto -> returns 
+idf.idfobjectitems(keys=None)
+    idfitems(keys=None)
+# we already have idf_helpers.getidfobjectlist
+# modify to have getidfobjectlist(filterkeys=None)
+
+# find orphaned objects
+# objectes that should be referenced, but are not.
+# do with new functions
+idfitems = idf.items()
+for idfobject in idfitems:
+    ref = idfobject_isreference(idfobject)
+    if ref:
+        print idfobject.fieldvalues[:2]
+        referingobjs = idfobject_referedby(idfobject)
+        if referingobjs:
+            for referingobj in referingobjs:
+                print '\t refered by:', referingobj.fieldvalues[:2] 
+        else:
+            print '\t is an orpahn idfobject'
+
+
+# find missing references -> with new finctions 
+idfitems = idf.items()
+for idfobject in idfitems:
+    for referedobject in idfobject_refersto(idfobject):
+        if referedobject not in idfitems:
+            is a missing reference
         
 
 2017-12-12

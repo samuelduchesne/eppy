@@ -110,13 +110,18 @@ def name2idfobject(idf, groupnamess=None, objkeys=None, **kwargs):
                 except BadEPFieldError as e:
                     continue
 
-def getidfobjectlist(idf):
-    """return a list of all idfobjects in idf"""
+def getidfobjectlist(idf, filterkeys=None):
+    """return a list of all idfobjects in idf if filterkeys==None
+    if filterkeys has a list of keys return only idfobjects that have that key
+    returned objects are ordered by order of:
+
+        - idfobjectkey name  in IDD file
+        - order of idfobjects IDF file
+    """
     idfobjects = idf.idfobjects  
-    # idfobjlst = [idfobjects[key] for key in idfobjects if idfobjects[key]]
-    idfobjlst = [idfobjects[key] for key in idf.model.dtls if idfobjects[key]]
-        # `for key in idf.model.dtls` maintains the order
-        # `for key in idfobjects` does not have order
+    if not filterkeys:
+        filterkeys = idf.model.dtls 
+    idfobjlst = [idfobjects[key] for key in filterkeys if idfobjects[key]]
     idfobjlst = itertools.chain.from_iterable(idfobjlst)
     idfobjlst = list(idfobjlst)
     return idfobjlst
@@ -126,3 +131,13 @@ def copyidfintoidf(toidf, fromidf):
     idfobjlst = getidfobjectlist(fromidf)
     for idfobj in idfobjlst:
         toidf.copyidfobject(idfobj)
+        
+def idfobject_isreference(idfobject):
+    """return True if idfobject has the \\reference tag in any field
+    \\reference tag is usually found in the 'Name' field.
+    This means that the idfobject can be reference by another idf object"""
+    for fieldname in idfobject.fieldnames:
+        ref = idfobject.getfieldidd_item(fieldname, u'reference')
+        if ref:
+            return True
+    return False

@@ -137,6 +137,8 @@ def test_name2idfobject():
 def test_getidfobjectlist():
     """py.test for getidfobjectlist"""
     names = ["a", "b", "c", "d", "e"]
+    buildingnames = ["a", "b"]
+    buildingandsitenames = ["a", "b", "c"]
     idf = IDF(StringIO(""))
     idf.newidfobject("building".upper(), Name="a")
     idf.newidfobject("building".upper(), Name="b")
@@ -145,6 +147,11 @@ def test_getidfobjectlist():
     idf.newidfobject("ScheduleTypeLimits".upper(), Name="e")
     result = idf_helpers.getidfobjectlist(idf)
     assert [res.Name for res in result] == names
+    result = idf_helpers.getidfobjectlist(idf, filterkeys=["building".upper()])
+    assert [res.Name for res in result] == buildingnames
+    result = idf_helpers.getidfobjectlist(idf, 
+                filterkeys=["building".upper(), "Site:Location".upper()])
+    assert [res.Name for res in result] == buildingandsitenames
     
 def test_copyidfintoidf():
     """py.test for copyidfintoidf"""
@@ -165,3 +172,14 @@ def test_copyidfintoidf():
     idf_helpers.copyidfintoidf(toidf, fromidf)
     result = idf_helpers.getidfobjectlist(toidf)
     assert [res.Name for res in result] == allnames
+
+def test_idfobject_isreference():
+    """py.test for idfobject_isreference"""
+    names = ["a", "b", "c", "d", "e"]
+    idf = IDF(StringIO(""))
+    idfobject = idf.newidfobject("material".upper(), Name="a")
+    result = idf_helpers.idfobject_isreference(idfobject)
+    assert result == True
+    idfobject = idf.newidfobject("building".upper(), Name="b")
+    result = idf_helpers.idfobject_isreference(idfobject)
+    assert result == False
