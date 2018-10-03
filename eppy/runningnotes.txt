@@ -1,5 +1,50 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2018-10-03
+----------
+
+EPJson work
+
+import json
+json?
+json.load?
+fname = "/Applications/EnergyPlus-8-9-0/Energy+.schema.epJSON"
+epjs = json.loads?
+epjs = json.load(open(fname, 'r'))
+epjs
+epjs.keys()
+prop = epjs[u'properties']
+type(prop)
+type.keys()
+prop.keys()
+keys = prop.keys()
+keys.index['Building']
+keys
+prop[u'Building']
+prop[u'Building']
+bldg = prop[u'Building']
+bldg
+bldg.keys()
+bldg[u'legacy_idd']
+bldg[u'name']
+bldg[u'memo']
+bldg[u'patternProperties']
+bldg[u'patternProperties'].keys()
+bldg[u'maxProperties']
+bldg[u'minProperties']
+bldg[u'type']
+bldg[u'min_fields']
+bldg[u'patternProperties'][u'.*']
+bld = bldg[u'patternProperties'][u'.*']
+type(bld)
+bld.keys()
+bld[u'type']
+bld[u'properties']
+type(bld[u'properties'])
+bld[u'properties'].keys()
+bld[u'properties'][u'north_axis']
+
+
 2018-09-18
 ----------
 
