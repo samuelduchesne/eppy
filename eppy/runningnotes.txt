@@ -3,6 +3,13 @@ rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line
 2018-10-03
 ----------
 
+put cookie cutter in to eppy:
+
+
+
+2018-10-03
+----------
+
 EPJson work
 
 import json
@@ -43,6 +50,14 @@ bld[u'properties']
 type(bld[u'properties'])
 bld[u'properties'].keys()
 bld[u'properties'][u'north_axis']
+
+Santoshs-MacBook-Pro:EnergyPlus-8-9-0 santosh$ ./energyplus --help
+EnergyPlus, Version 8.9.0-40101eaafd
+Usage: energyplus [options] [input-file]
+Options:
+  -a, --annual                 Force annual simulation
+  -c, --convert                Output IDF->epJSON or epJSON->IDF, dependent on
+                               input file type
 
 
 2018-09-18
