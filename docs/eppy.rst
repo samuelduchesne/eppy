@@ -84,22 +84,6 @@ eppy.iddgaps module
     :undoc-members:
     :show-inheritance:
 
-eppy.iddv7 module
------------------
-
-.. automodule:: eppy.iddv7
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-eppy.iddv800 module
--------------------
-
-.. automodule:: eppy.iddv800
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 eppy.idf\_helpers module
 ------------------------
 

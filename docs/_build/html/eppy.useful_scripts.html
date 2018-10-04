@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>eppy.useful_scripts package &#8212; eppy 0.5.46 documentation</title>
+    <title>eppy.useful_scripts package &#8212; eppy 0.5.48 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="_static/documentation_options.js"></script>
@@ -39,14 +39,39 @@
 <div class="section" id="eppy-useful-scripts-autosize-module">
 <h2>eppy.useful_scripts.autosize module<a class="headerlink" href="#eppy-useful-scripts-autosize-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="eppy-useful-scripts-change-edges-module">
-<h2>eppy.useful_scripts.change_edges module<a class="headerlink" href="#eppy-useful-scripts-change-edges-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-eppy.useful_scripts.change_edges">
+<span id="eppy-useful-scripts-change-edges-module"></span><h2>eppy.useful_scripts.change_edges module<a class="headerlink" href="#module-eppy.useful_scripts.change_edges" title="Permalink to this headline">¶</a></h2>
+<p>change the edges in loopdaigram so that there are no names with colons (:)</p>
+<dl class="function">
+<dt id="eppy.useful_scripts.change_edges.clean_edges">
+<code class="descclassname">eppy.useful_scripts.change_edges.</code><code class="descname">clean_edges</code><span class="sig-paren">(</span><em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/change_edges.html#clean_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.change_edges.clean_edges" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.change_edges.replace_colon">
+<code class="descclassname">eppy.useful_scripts.change_edges.</code><code class="descname">replace_colon</code><span class="sig-paren">(</span><em>s</em>, <em>replacewith=u'__'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/change_edges.html#replace_colon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.change_edges.replace_colon" title="Permalink to this definition">¶</a></dt>
+<dd><p>replace the colon with something</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.change_edges.test_cleanedges">
+<code class="descclassname">eppy.useful_scripts.change_edges.</code><code class="descname">test_cleanedges</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/change_edges.html#test_cleanedges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.change_edges.test_cleanedges" title="Permalink to this definition">¶</a></dt>
+<dd><p>py.test for cleanedges</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.change_edges.test_replace_colon">
+<code class="descclassname">eppy.useful_scripts.change_edges.</code><code class="descname">test_replace_colon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/change_edges.html#test_replace_colon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.change_edges.test_replace_colon" title="Permalink to this definition">¶</a></dt>
+<dd><p>py.test for replace_colon</p>
+</dd></dl>
+
 </div>
 <div class="section" id="eppy-useful-scripts-doc-images-module">
 <h2>eppy.useful_scripts.doc_images module<a class="headerlink" href="#eppy-useful-scripts-doc-images-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="eppy-useful-scripts-eppy-version-module">
-<h2>eppy.useful_scripts.eppy_version module<a class="headerlink" href="#eppy-useful-scripts-eppy-version-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-eppy.useful_scripts.eppy_version">
+<span id="eppy-useful-scripts-eppy-version-module"></span><h2>eppy.useful_scripts.eppy_version module<a class="headerlink" href="#module-eppy.useful_scripts.eppy_version" title="Permalink to this headline">¶</a></h2>
+<p>I print the current version of eppy. Being polite, I also say hello !</p>
 </div>
 <div class="section" id="eppy-useful-scripts-eppyreadtest-file-module">
 <h2>eppy.useful_scripts.eppyreadtest_file module<a class="headerlink" href="#eppy-useful-scripts-eppyreadtest-file-module" title="Permalink to this headline">¶</a></h2>
@@ -60,8 +85,140 @@
 <div class="section" id="eppy-useful-scripts-idfdiff-missing-module">
 <h2>eppy.useful_scripts.idfdiff_missing module<a class="headerlink" href="#eppy-useful-scripts-idfdiff-missing-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="eppy-useful-scripts-loopdiagram-module">
-<h2>eppy.useful_scripts.loopdiagram module<a class="headerlink" href="#eppy-useful-scripts-loopdiagram-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-eppy.useful_scripts.loopdiagram">
+<span id="eppy-useful-scripts-loopdiagram-module"></span><h2>eppy.useful_scripts.loopdiagram module<a class="headerlink" href="#module-eppy.useful_scripts.loopdiagram" title="Permalink to this headline">¶</a></h2>
+<p>Draw all the  loops in the IDF file.</p>
+<p>There are two output files saved in the same location as the idf file:
+- idf_file_location/idf_filename.dot
+- idf_file_location/idf_filename.png</p>
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.bothnodes">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">bothnodes</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#bothnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.bothnodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.clean_edges">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">clean_edges</code><span class="sig-paren">(</span><em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#clean_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.clean_edges" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.dropnodes">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">dropnodes</code><span class="sig-paren">(</span><em>edges</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#dropnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.dropnodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>draw a graph without the nodes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.edges2nodes">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">edges2nodes</code><span class="sig-paren">(</span><em>edges</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#edges2nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.edges2nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>gather the nodes from the edges</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.firstisnode">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">firstisnode</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#firstisnode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.firstisnode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.getedges">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">getedges</code><span class="sig-paren">(</span><em>fname</em>, <em>iddfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#getedges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.getedges" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the edges of the idf file fname</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.istuple">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">istuple</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#istuple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.istuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.main">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.make_and_save_diagram">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">make_and_save_diagram</code><span class="sig-paren">(</span><em>fname</em>, <em>iddfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#make_and_save_diagram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.make_and_save_diagram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.makeabranch">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">makeabranch</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#makeabranch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.makeabranch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.makeairplantloop">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">makeairplantloop</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#makeairplantloop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.makeairplantloop" title="Permalink to this definition">¶</a></dt>
+<dd><p>make the edges for the airloop and the plantloop</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.makeanode">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">makeanode</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#makeanode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.makeanode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.makebranchcomponents">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">makebranchcomponents</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>anode=u'epnode'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#makebranchcomponents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.makebranchcomponents" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the edges jointing the components of a branch</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.makediagram">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">makediagram</code><span class="sig-paren">(</span><em>edges</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#makediagram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.makediagram" title="Permalink to this definition">¶</a></dt>
+<dd><p>make the diagram with the edges</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.makeendnode">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">makeendnode</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#makeendnode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.makeendnode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.nodetype">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">nodetype</code><span class="sig-paren">(</span><em>anode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#nodetype"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.nodetype" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the type of node</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.process_idf">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">process_idf</code><span class="sig-paren">(</span><em>fname</em>, <em>iddfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#process_idf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.process_idf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.replace_colon">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">replace_colon</code><span class="sig-paren">(</span><em>s</em>, <em>replacewith=u'__'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#replace_colon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.replace_colon" title="Permalink to this definition">¶</a></dt>
+<dd><p>replace the colon with something</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.save_diagram">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">save_diagram</code><span class="sig-paren">(</span><em>fname</em>, <em>g</em>, <em>silent=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#save_diagram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.save_diagram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.secondisnode">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">secondisnode</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#secondisnode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.secondisnode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.useful_scripts.loopdiagram.transpose2d">
+<code class="descclassname">eppy.useful_scripts.loopdiagram.</code><code class="descname">transpose2d</code><span class="sig-paren">(</span><em>mtx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/useful_scripts/loopdiagram.html#transpose2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.useful_scripts.loopdiagram.transpose2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transpose a 2d matrix
+[</p>
+<blockquote>
+<div><blockquote>
+<div>[1,2,3],
+[4,5,6]
+]</div></blockquote>
+<p>becomes
+[</p>
+<blockquote>
+<div>[1,4],
+[2,5],
+[3,6]
+]</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
 </div>
 <div class="section" id="eppy-useful-scripts-relatedobjects-module">
 <h2>eppy.useful_scripts.relatedobjects module<a class="headerlink" href="#eppy-useful-scripts-relatedobjects-module" title="Permalink to this headline">¶</a></h2>
@@ -69,8 +226,8 @@
 <div class="section" id="eppy-useful-scripts-renamecolon-module">
 <h2>eppy.useful_scripts.renamecolon module<a class="headerlink" href="#eppy-useful-scripts-renamecolon-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-eppy.useful_scripts">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eppy.useful_scripts" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -86,17 +243,17 @@
 <li><a class="reference internal" href="#">eppy.useful_scripts package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-autosize-module">eppy.useful_scripts.autosize module</a></li>
-<li><a class="reference internal" href="#eppy-useful-scripts-change-edges-module">eppy.useful_scripts.change_edges module</a></li>
+<li><a class="reference internal" href="#module-eppy.useful_scripts.change_edges">eppy.useful_scripts.change_edges module</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-doc-images-module">eppy.useful_scripts.doc_images module</a></li>
-<li><a class="reference internal" href="#eppy-useful-scripts-eppy-version-module">eppy.useful_scripts.eppy_version module</a></li>
+<li><a class="reference internal" href="#module-eppy.useful_scripts.eppy_version">eppy.useful_scripts.eppy_version module</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-eppyreadtest-file-module">eppy.useful_scripts.eppyreadtest_file module</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-eppyreadtest-folder-module">eppy.useful_scripts.eppyreadtest_folder module</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-idfdiff-module">eppy.useful_scripts.idfdiff module</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-idfdiff-missing-module">eppy.useful_scripts.idfdiff_missing module</a></li>
-<li><a class="reference internal" href="#eppy-useful-scripts-loopdiagram-module">eppy.useful_scripts.loopdiagram module</a></li>
+<li><a class="reference internal" href="#module-eppy.useful_scripts.loopdiagram">eppy.useful_scripts.loopdiagram module</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-relatedobjects-module">eppy.useful_scripts.relatedobjects module</a></li>
 <li><a class="reference internal" href="#eppy-useful-scripts-renamecolon-module">eppy.useful_scripts.renamecolon module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li><a class="reference internal" href="#module-eppy.useful_scripts">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -135,7 +292,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/eppy.useful_scripts.rst.txt"

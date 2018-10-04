@@ -1,5 +1,17 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2018-10-04
+----------
+
+trying do `make docs`
+
+copied from cookiecutter generated eppp:
+- docs/Makefile
+- docs/conf.py
+- moved files form docs/source to docs/
+- removed iddv*.py files
+    - or rename them as _iddv*.py
+
 2018-10-03
 ----------
 

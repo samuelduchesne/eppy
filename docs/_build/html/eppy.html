@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>eppy package &#8212; eppy 0.5.46 documentation</title>
+    <title>eppy package &#8212; eppy 0.5.48 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="_static/documentation_options.js"></script>
@@ -33,8 +33,916 @@
             
   <div class="section" id="eppy-package">
 <h1>eppy package<a class="headerlink" href="#eppy-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="eppy.results.html">eppy.results package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eppy.results.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eppy.results.html#module-eppy.results.readhtml">eppy.results.readhtml module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eppy.results.html#module-eppy.results">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="eppy.runner.html">eppy.runner package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eppy.runner.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eppy.runner.html#module-eppy.runner.run_functions">eppy.runner.run_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eppy.runner.html#module-eppy.runner">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-eppy.bunch_subclass">
+<span id="eppy-bunch-subclass-module"></span><h2>eppy.bunch_subclass module<a class="headerlink" href="#module-eppy.bunch_subclass" title="Permalink to this headline">¶</a></h2>
+<p>Sub class Bunch to represent an IDF object.</p>
+<dl class="exception">
+<dt id="eppy.bunch_subclass.BadEPFieldError">
+<em class="property">exception </em><code class="descclassname">eppy.bunch_subclass.</code><code class="descname">BadEPFieldError</code><a class="reference internal" href="_modules/eppy/bunch_subclass.html#BadEPFieldError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.BadEPFieldError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.AttributeError</span></code></p>
+<p>An Exception</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="eppy.bunch_subclass.EpBunch">
+<em class="property">class </em><code class="descclassname">eppy.bunch_subclass.</code><code class="descname">EpBunch</code><span class="sig-paren">(</span><em>obj</em>, <em>objls</em>, <em>objidd</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">munch.Munch</span></code></p>
+<p>Fields, values, and descriptions of fields in an EnergyPlus IDF object
+stored in a <cite>bunch</cite> which is a <cite>dict</cite> extended to allow access to dict
+fields as attributes as well as by keys.</p>
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.checkrange">
+<code class="descname">checkrange</code><span class="sig-paren">(</span><em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.checkrange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.checkrange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the value for a field is within the allowed range.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="eppy.bunch_subclass.EpBunch.fieldnames">
+<code class="descname">fieldnames</code><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.fieldnames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Friendly name for objls.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="eppy.bunch_subclass.EpBunch.fieldvalues">
+<code class="descname">fieldvalues</code><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.fieldvalues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Friendly name for obj.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.get_referenced_object">
+<code class="descname">get_referenced_object</code><span class="sig-paren">(</span><em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.get_referenced_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.get_referenced_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an object referred to by a field in another object.</p>
+<p>For example an object of type Construction has fields for each layer, each
+of which refers to a Material. This functions allows the object
+representing a Material to be fetched using the name of the layer.</p>
+<p>Returns the first item found since if there is more than one matching item,
+it is a malformed IDF.</p>
+<dl class="docutils">
+<dt>referring_object <span class="classifier-delimiter">:</span> <span class="classifier">EpBunch</span></dt>
+<dd>The object which contains a reference to another object,</dd>
+<dt>fieldname <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>The name of the field in the referring object which contains the
+reference to another object.</dd>
+</dl>
+<p>EpBunch</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.get_retaincase">
+<code class="descname">get_retaincase</code><span class="sig-paren">(</span><em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.get_retaincase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.get_retaincase" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if the field should retain case</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.getfieldidd">
+<code class="descname">getfieldidd</code><span class="sig-paren">(</span><em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.getfieldidd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.getfieldidd" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the idd dict for this field
+Will return {} if the fieldname does not exist</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.getfieldidd_item">
+<code class="descname">getfieldidd_item</code><span class="sig-paren">(</span><em>fieldname</em>, <em>iddkey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.getfieldidd_item"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.getfieldidd_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an item from the fieldidd, given the iddkey
+will return and empty list if it does not have the iddkey
+or if the fieldname does not exist</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.getrange">
+<code class="descname">getrange</code><span class="sig-paren">(</span><em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.getrange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.getrange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the allowed range of values for a field.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.getreferingobjs">
+<code class="descname">getreferingobjs</code><span class="sig-paren">(</span><em>iddgroups=None</em>, <em>fields=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.getreferingobjs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.getreferingobjs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of objects that refer to this object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.bunch_subclass.EpBunch.isequal">
+<code class="descname">isequal</code><span class="sig-paren">(</span><em>fieldname</em>, <em>value</em>, <em>places=7</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#EpBunch.isequal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.EpBunch.isequal" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True if the field == value
+Will retain case if get_retaincase == True
+for real value will compare to decimal ‘places’</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="eppy.bunch_subclass.RangeError">
+<em class="property">exception </em><code class="descclassname">eppy.bunch_subclass.</code><code class="descname">RangeError</code><a class="reference internal" href="_modules/eppy/bunch_subclass.html#RangeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.RangeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.ValueError</span></code></p>
+<p>An Exception</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.addfunctions">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">addfunctions</code><span class="sig-paren">(</span><em>abunch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#addfunctions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.addfunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>add functions to epbunch</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.almostequal">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">almostequal</code><span class="sig-paren">(</span><em>first</em>, <em>second</em>, <em>places=7</em>, <em>printit=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#almostequal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.almostequal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if two values are equal to a given number of places.
+This is based on python’s unittest so may be covered by Python’s
+license.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.checkrange">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">checkrange</code><span class="sig-paren">(</span><em>bch</em>, <em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#checkrange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.checkrange" title="Permalink to this definition">¶</a></dt>
+<dd><p>throw exception if the out of range</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.extendlist">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">extendlist</code><span class="sig-paren">(</span><em>lst</em>, <em>i</em>, <em>value=u''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#extendlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.extendlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>extend the list so that you have i-th value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.get_referenced_object">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">get_referenced_object</code><span class="sig-paren">(</span><em>referring_object</em>, <em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#get_referenced_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.get_referenced_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an object referred to by a field in another object.</p>
+<p>For example an object of type Construction has fields for each layer, each
+of which refers to a Material. This functions allows the object
+representing a Material to be fetched using the name of the layer.</p>
+<p>Returns the first item found since if there is more than one matching item,
+it is a malformed IDF.</p>
+<dl class="docutils">
+<dt>referring_object <span class="classifier-delimiter">:</span> <span class="classifier">EpBunch</span></dt>
+<dd>The object which contains a reference to another object,</dd>
+<dt>fieldname <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>The name of the field in the referring object which contains the
+reference to another object.</dd>
+</dl>
+<p>EpBunch</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.get_retaincase">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">get_retaincase</code><span class="sig-paren">(</span><em>bch</em>, <em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#get_retaincase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.get_retaincase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the field should retain case</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.getfieldidd">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">getfieldidd</code><span class="sig-paren">(</span><em>bch</em>, <em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#getfieldidd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.getfieldidd" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the idd dict for this field
+Will return {} if the fieldname does not exist</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.getfieldidd_item">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">getfieldidd_item</code><span class="sig-paren">(</span><em>bch</em>, <em>fieldname</em>, <em>iddkey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#getfieldidd_item"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.getfieldidd_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an item from the fieldidd, given the iddkey
+will return and empty list if it does not have the iddkey
+or if the fieldname does not exist</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.getrange">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">getrange</code><span class="sig-paren">(</span><em>bch</em>, <em>fieldname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#getrange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.getrange" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the ranges for this field</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.getreferingobjs">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">getreferingobjs</code><span class="sig-paren">(</span><em>referedobj</em>, <em>iddgroups=None</em>, <em>fields=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#getreferingobjs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.getreferingobjs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of objects that refer to this object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.isequal">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">isequal</code><span class="sig-paren">(</span><em>bch</em>, <em>fieldname</em>, <em>value</em>, <em>places=7</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#isequal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.isequal" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True if the field is equal to value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.return42">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">return42</code><span class="sig-paren">(</span><em>self</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#return42"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.return42" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunch_subclass.somevalues">
+<code class="descclassname">eppy.bunch_subclass.</code><code class="descname">somevalues</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunch_subclass.html#somevalues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunch_subclass.somevalues" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns some values</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eppy.bunchhelpers">
+<span id="eppy-bunchhelpers-module"></span><h2>eppy.bunchhelpers module<a class="headerlink" href="#module-eppy.bunchhelpers" title="Permalink to this headline">¶</a></h2>
+<p>some helper files</p>
+<dl class="function">
+<dt id="eppy.bunchhelpers.cleancommdct">
+<code class="descclassname">eppy.bunchhelpers.</code><code class="descname">cleancommdct</code><span class="sig-paren">(</span><em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunchhelpers.html#cleancommdct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunchhelpers.cleancommdct" title="Permalink to this definition">¶</a></dt>
+<dd><p>make all keys in commdct lower case</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunchhelpers.cleaniddfield">
+<code class="descclassname">eppy.bunchhelpers.</code><code class="descname">cleaniddfield</code><span class="sig-paren">(</span><em>acomm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunchhelpers.html#cleaniddfield"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunchhelpers.cleaniddfield" title="Permalink to this definition">¶</a></dt>
+<dd><p>make all the keys lower case</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunchhelpers.intinlist">
+<code class="descclassname">eppy.bunchhelpers.</code><code class="descname">intinlist</code><span class="sig-paren">(</span><em>lst</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunchhelpers.html#intinlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunchhelpers.intinlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>test if int in list</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunchhelpers.makefieldname">
+<code class="descclassname">eppy.bunchhelpers.</code><code class="descname">makefieldname</code><span class="sig-paren">(</span><em>namefromidd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunchhelpers.html#makefieldname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunchhelpers.makefieldname" title="Permalink to this definition">¶</a></dt>
+<dd><p>made a field name that can be used by bunch</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunchhelpers.matchfieldnames">
+<code class="descclassname">eppy.bunchhelpers.</code><code class="descname">matchfieldnames</code><span class="sig-paren">(</span><em>field_a</em>, <em>field_b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunchhelpers.html#matchfieldnames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunchhelpers.matchfieldnames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check match between two strings, ignoring case and spaces/underscores.</p>
+<p>a : str
+b : str</p>
+<p>bool</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunchhelpers.onlylegalchar">
+<code class="descclassname">eppy.bunchhelpers.</code><code class="descname">onlylegalchar</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunchhelpers.html#onlylegalchar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunchhelpers.onlylegalchar" title="Permalink to this definition">¶</a></dt>
+<dd><p>return only legal chars</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.bunchhelpers.replaceint">
+<code class="descclassname">eppy.bunchhelpers.</code><code class="descname">replaceint</code><span class="sig-paren">(</span><em>fname</em>, <em>replacewith=u'%s'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/bunchhelpers.html#replaceint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.bunchhelpers.replaceint" title="Permalink to this definition">¶</a></dt>
+<dd><p>replace int in lst</p>
+</dd></dl>
+
+</div>
+<div class="section" id="eppy-easyopen-module">
+<h2>eppy.easyopen module<a class="headerlink" href="#eppy-easyopen-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-eppy.ex_inits">
+<span id="eppy-ex-inits-module"></span><h2>eppy.ex_inits module<a class="headerlink" href="#module-eppy.ex_inits" title="Permalink to this headline">¶</a></h2>
+<p>some init routines to do the documentation</p>
+</div>
+<div class="section" id="module-eppy.fanpower">
+<span id="eppy-fanpower-module"></span><h2>eppy.fanpower module<a class="headerlink" href="#module-eppy.fanpower" title="Permalink to this headline">¶</a></h2>
+<p>quick and dirty functions for get fan power BHP or Watts</p>
+<dl class="function">
+<dt id="eppy.fanpower.bhp2watts">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">bhp2watts</code><span class="sig-paren">(</span><em>bhp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#bhp2watts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.bhp2watts" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert brake horsepower (bhp) to watts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.fanpower.fan_bhp">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">fan_bhp</code><span class="sig-paren">(</span><em>fan_tot_eff</em>, <em>pascal</em>, <em>m3s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#fan_bhp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.fan_bhp" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the fan power in bhp given fan efficiency, Pressure rise (Pa) and flow (m3/s)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.fanpower.fan_maxcfm">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">fan_maxcfm</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#fan_maxcfm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.fan_maxcfm" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the fan max cfm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.fanpower.fan_watts">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">fan_watts</code><span class="sig-paren">(</span><em>fan_tot_eff</em>, <em>pascal</em>, <em>m3s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#fan_watts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.fan_watts" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the fan power in watts given fan efficiency, Pressure rise (Pa) and flow (m3/s)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.fanpower.fanpower_bhp">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">fanpower_bhp</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#fanpower_bhp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.fanpower_bhp" title="Permalink to this definition">¶</a></dt>
+<dd><p>return fan power in bhp given the fan IDF object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.fanpower.fanpower_watts">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">fanpower_watts</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#fanpower_watts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.fanpower_watts" title="Permalink to this definition">¶</a></dt>
+<dd><p>return fan power in bhp given the fan IDF object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.fanpower.m3s2cfm">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">m3s2cfm</code><span class="sig-paren">(</span><em>m3s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#m3s2cfm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.m3s2cfm" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert flow meter^3/second to cfm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.fanpower.pascal2inh2o">
+<code class="descclassname">eppy.fanpower.</code><code class="descname">pascal2inh2o</code><span class="sig-paren">(</span><em>pascal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/fanpower.html#pascal2inh2o"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.fanpower.pascal2inh2o" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert pressure in Pascals to inches of water</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eppy.function_helpers">
+<span id="eppy-function-helpers-module"></span><h2>eppy.function_helpers module<a class="headerlink" href="#module-eppy.function_helpers" title="Permalink to this headline">¶</a></h2>
+<p>helper functions for the functions called by bunchdt</p>
+<dl class="function">
+<dt id="eppy.function_helpers.area">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">area</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.area" title="Permalink to this definition">¶</a></dt>
+<dd><p>area of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.azimuth">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">azimuth</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#azimuth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.azimuth" title="Permalink to this definition">¶</a></dt>
+<dd><p>azimuth of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.buildingname">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">buildingname</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#buildingname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.buildingname" title="Permalink to this definition">¶</a></dt>
+<dd><p>return building name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.fan_maxcfm">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">fan_maxcfm</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#fan_maxcfm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.fan_maxcfm" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the Maximum_Flow_Rate in cfm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.fanpower_bhp">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">fanpower_bhp</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#fanpower_bhp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.fanpower_bhp" title="Permalink to this definition">¶</a></dt>
+<dd><p>return fanpower in bhp</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.fanpower_watts">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">fanpower_watts</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#fanpower_watts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.fanpower_watts" title="Permalink to this definition">¶</a></dt>
+<dd><p>return fanpower in watts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.getcoords">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">getcoords</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#getcoords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.getcoords" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the coordinates of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.grouper">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">grouper</code><span class="sig-paren">(</span><em>num</em>, <em>iterable</em>, <em>fillvalue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#grouper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.grouper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect data into fixed-length chunks or blocks</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.heatcapacity">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">heatcapacity</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#heatcapacity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.heatcapacity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.height">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">height</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#height"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.height" title="Permalink to this definition">¶</a></dt>
+<dd><p>height of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.rvalue">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">rvalue</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#rvalue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.rvalue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.rvalue_ip">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">rvalue_ip</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#rvalue_ip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.rvalue_ip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.subsurfaces">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">subsurfaces</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#subsurfaces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.subsurfaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>return al list of surfaces that belong to the zone</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.tilt">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">tilt</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#tilt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.tilt" title="Permalink to this definition">¶</a></dt>
+<dd><p>tilt of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.ufactor">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">ufactor</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#ufactor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.ufactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.ufactor_ip">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">ufactor_ip</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#ufactor_ip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.ufactor_ip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.width">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">width</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.width" title="Permalink to this definition">¶</a></dt>
+<dd><p>width of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.function_helpers.zonesurfaces">
+<code class="descclassname">eppy.function_helpers.</code><code class="descname">zonesurfaces</code><span class="sig-paren">(</span><em>ddtt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/function_helpers.html#zonesurfaces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.function_helpers.zonesurfaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>return al list of surfaces that belong to the zone</p>
+</dd></dl>
+
+</div>
+<div class="section" id="eppy-hvacbuilder-module">
+<h2>eppy.hvacbuilder module<a class="headerlink" href="#eppy-hvacbuilder-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="eppy-iddcurrent-module">
+<h2>eppy.iddcurrent module<a class="headerlink" href="#eppy-iddcurrent-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-eppy.iddgaps">
+<span id="eppy-iddgaps-module"></span><h2>eppy.iddgaps module<a class="headerlink" href="#module-eppy.iddgaps" title="Permalink to this headline">¶</a></h2>
+<p>idd comments have gaps in them.
+With 
+ote fields as indicated
+This code fills those gaps
+see: SCHEDULE:DAY:LIST as an example</p>
+<dl class="function">
+<dt id="eppy.iddgaps.cleancommdct">
+<code class="descclassname">eppy.iddgaps.</code><code class="descname">cleancommdct</code><span class="sig-paren">(</span><em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/iddgaps.html#cleancommdct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.iddgaps.cleancommdct" title="Permalink to this definition">¶</a></dt>
+<dd><p>make all keys in commdct lower case</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.iddgaps.cleaniddfield">
+<code class="descclassname">eppy.iddgaps.</code><code class="descname">cleaniddfield</code><span class="sig-paren">(</span><em>acomm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/iddgaps.html#cleaniddfield"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.iddgaps.cleaniddfield" title="Permalink to this definition">¶</a></dt>
+<dd><p>make all the keys lower case</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.iddgaps.getfields">
+<code class="descclassname">eppy.iddgaps.</code><code class="descname">getfields</code><span class="sig-paren">(</span><em>comm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/iddgaps.html#getfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.iddgaps.getfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>get all the fields that have the key ‘field’</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.iddgaps.missingkeys_nonstandard">
+<code class="descclassname">eppy.iddgaps.</code><code class="descname">missingkeys_nonstandard</code><span class="sig-paren">(</span><em>block</em>, <em>commdct</em>, <em>dtls</em>, <em>objectlist</em>, <em>afield=u'afiled %s'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/iddgaps.html#missingkeys_nonstandard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.iddgaps.missingkeys_nonstandard" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an object list where thre is no first field name
+to give a hint of what the first field name should be</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.iddgaps.missingkeys_standard">
+<code class="descclassname">eppy.iddgaps.</code><code class="descname">missingkeys_standard</code><span class="sig-paren">(</span><em>commdct</em>, <em>dtls</em>, <em>skiplist=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/iddgaps.html#missingkeys_standard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.iddgaps.missingkeys_standard" title="Permalink to this definition">¶</a></dt>
+<dd><p>put missing keys in commdct for standard objects
+return a list of keys where it is unable to do so
+commdct is not returned, but is updated</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.iddgaps.repeatingfieldsnames">
+<code class="descclassname">eppy.iddgaps.</code><code class="descname">repeatingfieldsnames</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/iddgaps.html#repeatingfieldsnames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.iddgaps.repeatingfieldsnames" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the names of the repeating fields</p>
+</dd></dl>
+
+</div>
+<div class="section" id="eppy-idf-helpers-module">
+<h2>eppy.idf_helpers module<a class="headerlink" href="#eppy-idf-helpers-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-eppy.idf_msequence">
+<span id="eppy-idf-msequence-module"></span><h2>eppy.idf_msequence module<a class="headerlink" href="#module-eppy.idf_msequence" title="Permalink to this headline">¶</a></h2>
+<p>Subclass from collections.MutableSequence to get finer control over a list like
+object.</p>
+<p>This is to work with issue 40 in github:</p>
+<p>idf1.idfobjects[‘BUILDING’] is a list and is not connected to
+idf1.model.dt[‘BUILDING’]</p>
+<p>List has to be subclassed to solve this problem.</p>
+<p># Alex Martelli describes how to use collections.MutableSequence in
+# &lt;<a class="reference external" href="http://stackoverflow.com/questions/3487434/overriding-append-method-after-inheriting-from-a-python-list">http://stackoverflow.com/questions/3487434/overriding-append-method-after-inheriting-from-a-python-list</a>&gt;</p>
+<dl class="class">
+<dt id="eppy.idf_msequence.Idf_MSequence">
+<em class="property">class </em><code class="descclassname">eppy.idf_msequence.</code><code class="descname">Idf_MSequence</code><span class="sig-paren">(</span><em>list1</em>, <em>list2</em>, <em>theidf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idf_msequence.html#Idf_MSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idf_msequence.Idf_MSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_abcoll.MutableSequence</span></code></p>
+<p>Used to keep IDF.idfobjects in sync with IDF.model.dt.</p>
+<dl class="method">
+<dt id="eppy.idf_msequence.Idf_MSequence.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>i</em>, <em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idf_msequence.html#Idf_MSequence.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idf_msequence.Idf_MSequence.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert an idfobject (bunch) to list1 and its object to list2.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-eppy.idfreader">
+<span id="eppy-idfreader-module"></span><h2>eppy.idfreader module<a class="headerlink" href="#module-eppy.idfreader" title="Permalink to this headline">¶</a></h2>
+<p>use epbunch</p>
+<dl class="class">
+<dt id="eppy.idfreader.ConvInIDD">
+<em class="property">class </em><code class="descclassname">eppy.idfreader.</code><code class="descname">ConvInIDD</code><a class="reference internal" href="_modules/eppy/idfreader.html#ConvInIDD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.ConvInIDD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>hold the conversion function to integer, real and no_type</p>
+<dl class="method">
+<dt id="eppy.idfreader.ConvInIDD.conv_dict">
+<code class="descname">conv_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#ConvInIDD.conv_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.ConvInIDD.conv_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>dictionary of conversion</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="eppy.idfreader.ConvInIDD.integer">
+<code class="descname">integer</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#ConvInIDD.integer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.ConvInIDD.integer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eppy.idfreader.ConvInIDD.no_type">
+<code class="descname">no_type</code><span class="sig-paren">(</span><em>x</em>, <em>avar</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#ConvInIDD.no_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.ConvInIDD.no_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="eppy.idfreader.ConvInIDD.real">
+<code class="descname">real</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#ConvInIDD.real"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.ConvInIDD.real" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.addfunctions">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">addfunctions</code><span class="sig-paren">(</span><em>dtls</em>, <em>bunchdt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#addfunctions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.addfunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>add functions to the objects</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.addfunctions2new">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">addfunctions2new</code><span class="sig-paren">(</span><em>abunch</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#addfunctions2new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.addfunctions2new" title="Permalink to this definition">¶</a></dt>
+<dd><p>add functions to a new bunch/munch object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.convertafield">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">convertafield</code><span class="sig-paren">(</span><em>field_comm</em>, <em>field_val</em>, <em>field_iddname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#convertafield"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.convertafield" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert field based on field info in IDD</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.convertallfields">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">convertallfields</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>block=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#convertallfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.convertallfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring for convertallfields</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.convertfields">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">convertfields</code><span class="sig-paren">(</span><em>key_comm</em>, <em>obj</em>, <em>inblock=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#convertfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.convertfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert based on float, integer, and A1, N1</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.convertfields_old">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">convertfields_old</code><span class="sig-paren">(</span><em>key_comm</em>, <em>obj</em>, <em>inblock=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#convertfields_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.convertfields_old" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert the float and interger fields</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.iddversiontuple">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">iddversiontuple</code><span class="sig-paren">(</span><em>afile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#iddversiontuple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.iddversiontuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>given the idd file or filehandle, return the version handle</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.idfreader">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">idfreader</code><span class="sig-paren">(</span><em>fname</em>, <em>iddfile</em>, <em>conv=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#idfreader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.idfreader" title="Permalink to this definition">¶</a></dt>
+<dd><p>read idf file and return bunches</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.idfreader1">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">idfreader1</code><span class="sig-paren">(</span><em>fname</em>, <em>iddfile</em>, <em>theidf</em>, <em>conv=True</em>, <em>commdct=None</em>, <em>block=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#idfreader1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.idfreader1" title="Permalink to this definition">¶</a></dt>
+<dd><p>read idf file and return bunches</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.makeabunch">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">makeabunch</code><span class="sig-paren">(</span><em>commdct</em>, <em>obj</em>, <em>obj_i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#makeabunch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.makeabunch" title="Permalink to this definition">¶</a></dt>
+<dd><p>make a bunch from the object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.makebunches">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">makebunches</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#makebunches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.makebunches" title="Permalink to this definition">¶</a></dt>
+<dd><p>make bunches with data</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.idfreader.makebunches_alter">
+<code class="descclassname">eppy.idfreader.</code><code class="descname">makebunches_alter</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>theidf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/idfreader.html#makebunches_alter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.idfreader.makebunches_alter" title="Permalink to this definition">¶</a></dt>
+<dd><p>make bunches with data</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eppy.json_functions">
+<span id="eppy-json-functions-module"></span><h2>eppy.json_functions module<a class="headerlink" href="#module-eppy.json_functions" title="Permalink to this headline">¶</a></h2>
+<p>functions to use json to modify an idf file</p>
+<dl class="function">
+<dt id="eppy.json_functions.key2elements">
+<code class="descclassname">eppy.json_functions.</code><code class="descname">key2elements</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/json_functions.html#key2elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.json_functions.key2elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>split key to elements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.json_functions.updateidf">
+<code class="descclassname">eppy.json_functions.</code><code class="descname">updateidf</code><span class="sig-paren">(</span><em>idf</em>, <em>dct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/json_functions.html#updateidf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.json_functions.updateidf" title="Permalink to this definition">¶</a></dt>
+<dd><p>update idf using dct</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eppy.loops">
+<span id="eppy-loops-module"></span><h2>eppy.loops module<a class="headerlink" href="#module-eppy.loops" title="Permalink to this headline">¶</a></h2>
+<p>get the loop data to draw the diagram
+Other notes:
+- tested for idd version 6.0
+- when E+ is updated, run versionchangecheck.py for the following objects
+uses the following objects
+[‘plantloop’, ]</p>
+<dl class="function">
+<dt id="eppy.loops.branch_inlet_outlet">
+<code class="descclassname">eppy.loops.</code><code class="descname">branch_inlet_outlet</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>branchname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#branch_inlet_outlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.branch_inlet_outlet" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the inlet and outlet of a branch</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.branchlist2branches">
+<code class="descclassname">eppy.loops.</code><code class="descname">branchlist2branches</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>branchlist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#branchlist2branches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.branchlist2branches" title="Permalink to this definition">¶</a></dt>
+<dd><p>get branches from the branchlist</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.extractfields">
+<code class="descclassname">eppy.loops.</code><code class="descname">extractfields</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>objkey</em>, <em>fieldlists</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#extractfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.extractfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>get all the objects of objkey.
+fieldlists will have a fieldlist for each of those objects.
+return the contents of those fields</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.getadistus">
+<code class="descclassname">eppy.loops.</code><code class="descname">getadistus</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#getadistus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.getadistus" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring for fname</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.getfieldindex">
+<code class="descclassname">eppy.loops.</code><code class="descname">getfieldindex</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>objkey</em>, <em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#getfieldindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.getfieldindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>given objkey and fieldname, return its index</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.makeadistu_inlets">
+<code class="descclassname">eppy.loops.</code><code class="descname">makeadistu_inlets</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#makeadistu_inlets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.makeadistu_inlets" title="Permalink to this definition">¶</a></dt>
+<dd><p>make the dict adistu_inlets</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.mixerfields">
+<code class="descclassname">eppy.loops.</code><code class="descname">mixerfields</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#mixerfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.mixerfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>get mixer fields to diagram it</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.objectcount">
+<code class="descclassname">eppy.loops.</code><code class="descname">objectcount</code><span class="sig-paren">(</span><em>data</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#objectcount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.objectcount" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the count of objects of key</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.plantloopfieldlists">
+<code class="descclassname">eppy.loops.</code><code class="descname">plantloopfieldlists</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#plantloopfieldlists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.plantloopfieldlists" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the plantloopfield list</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.plantloopfields">
+<code class="descclassname">eppy.loops.</code><code class="descname">plantloopfields</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#plantloopfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.plantloopfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>get plantloop fields to diagram it</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.repeatingfields">
+<code class="descclassname">eppy.loops.</code><code class="descname">repeatingfields</code><span class="sig-paren">(</span><em>theidd</em>, <em>commdct</em>, <em>objkey</em>, <em>flds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#repeatingfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.repeatingfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a list of repeating fields
+fld is in format ‘Component %s Name’
+so flds = [fld % (i, ) for i in range(n)]
+does not work for ‘fields as indicated’</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.splitterfields">
+<code class="descclassname">eppy.loops.</code><code class="descname">splitterfields</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#splitterfields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.splitterfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>get splitter fields to diagram it</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.loops.splittermixerfieldlists">
+<code class="descclassname">eppy.loops.</code><code class="descname">splittermixerfieldlists</code><span class="sig-paren">(</span><em>data</em>, <em>commdct</em>, <em>objkey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/loops.html#splittermixerfieldlists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.loops.splittermixerfieldlists" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring for splittermixerfieldlists</p>
+</dd></dl>
+
+</div>
+<div class="section" id="eppy-modeleditor-module">
+<h2>eppy.modeleditor module<a class="headerlink" href="#eppy-modeleditor-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-eppy.pytest_helpers">
+<span id="eppy-pytest-helpers-module"></span><h2>eppy.pytest_helpers module<a class="headerlink" href="#module-eppy.pytest_helpers" title="Permalink to this headline">¶</a></h2>
+<p>helpers for pytest</p>
+<dl class="function">
+<dt id="eppy.pytest_helpers.almostequal">
+<code class="descclassname">eppy.pytest_helpers.</code><code class="descname">almostequal</code><span class="sig-paren">(</span><em>first</em>, <em>second</em>, <em>places=7</em>, <em>printit=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/pytest_helpers.html#almostequal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.pytest_helpers.almostequal" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring for almostequal
+# taken from python’s unit test
+# may be covered by Python’s license</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.pytest_helpers.do_integration_tests">
+<code class="descclassname">eppy.pytest_helpers.</code><code class="descname">do_integration_tests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/pytest_helpers.html#do_integration_tests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.pytest_helpers.do_integration_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the ‘EPPY_INTEGRATION’ environment variable has been set to do
+integration tests.</p>
+<p>bool</p>
+</dd></dl>
+
+</div>
+<div class="section" id="eppy-simpleread-module">
+<h2>eppy.simpleread module<a class="headerlink" href="#eppy-simpleread-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-eppy.simplesurface">
+<span id="eppy-simplesurface-module"></span><h2>eppy.simplesurface module<a class="headerlink" href="#module-eppy.simplesurface" title="Permalink to this headline">¶</a></h2>
+<p>from BUILDINGSURFACE:DETAILED and FENESTRATIONSURFACE:DETAILED make a wall
+floor, celiling etc or a window</p>
+<dl class="exception">
+<dt id="eppy.simplesurface.NotImplementedError">
+<em class="property">exception </em><code class="descclassname">eppy.simplesurface.</code><code class="descname">NotImplementedError</code><a class="reference internal" href="_modules/eppy/simplesurface.html#NotImplementedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.NotImplementedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.Exception</span></code></p>
+<p>Exception Object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.bsdorigin">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">bsdorigin</code><span class="sig-paren">(</span><em>bsdobject</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#bsdorigin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.bsdorigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the origin of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.ceilingadiabatic">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">ceilingadiabatic</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#ceilingadiabatic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.ceilingadiabatic" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a ceiling:adiabatic if bsdobject (buildingsurface:detailed) is an 
+adiabatic ceiling</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.ceilinginterzone">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">ceilinginterzone</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#ceilinginterzone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.ceilinginterzone" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an ceiling:interzone object if the bsd (buildingsurface:detailed) 
+is an interzone ceiling</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.door">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">door</code><span class="sig-paren">(</span><em>idf</em>, <em>fsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#door"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.door" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an door object if the fsd (fenestrationsurface:detailed) is 
+a door</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.flooradiabatic">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">flooradiabatic</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#flooradiabatic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.flooradiabatic" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a floor:adiabatic if bsdobject (buildingsurface:detailed) is an 
+adibatic floor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.floorgroundcontact">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">floorgroundcontact</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#floorgroundcontact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.floorgroundcontact" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a wall:adiabatic if bsdobject (buildingsurface:detailed) is an 
+adibatic wall</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.floorinterzone">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">floorinterzone</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#floorinterzone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.floorinterzone" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an floor:interzone object if the bsd (buildingsurface:detailed) 
+is an interaone floor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.fsdorigin">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">fsdorigin</code><span class="sig-paren">(</span><em>fsdobject</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#fsdorigin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.fsdorigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the origin of the surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.glazeddoor">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">glazeddoor</code><span class="sig-paren">(</span><em>idf</em>, <em>fsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#glazeddoor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.glazeddoor" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an glazeddoor object if the fsd (fenestrationsurface:detailed) is 
+a glassdoor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.roof">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">roof</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#roof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.roof" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an roof object if the bsd (buildingsurface:detailed) is 
+a roof</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.simplefenestration">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">simplefenestration</code><span class="sig-paren">(</span><em>idf</em>, <em>fsd</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#simplefenestration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.simplefenestration" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a bsd (fenestrationsurface:detailed) into a simple 
+fenestrations</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.simplesurface">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">simplesurface</code><span class="sig-paren">(</span><em>idf</em>, <em>bsd</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#simplesurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.simplesurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a bsd (buildingsurface:detailed) into a simple surface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.walladiabatic">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">walladiabatic</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#walladiabatic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.walladiabatic" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a wall:adiabatic if bsdobject (buildingsurface:detailed) is an 
+adibatic wall</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.wallexterior">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">wallexterior</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#wallexterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.wallexterior" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an wall:exterior object if the  (buildingsurface:detailed) is 
+an exterior wall</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.wallinterzone">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">wallinterzone</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#wallinterzone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.wallinterzone" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an wall:interzone object if the bsd (buildingsurface:detailed) 
+is an interaone wall</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.wallunderground">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">wallunderground</code><span class="sig-paren">(</span><em>idf</em>, <em>bsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#wallunderground"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.wallunderground" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a wall:underground if bsdobject (buildingsurface:detailed) is an 
+underground wall</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.simplesurface.window">
+<code class="descclassname">eppy.simplesurface.</code><code class="descname">window</code><span class="sig-paren">(</span><em>idf</em>, <em>fsdobject</em>, <em>deletebsd=True</em>, <em>setto000=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/simplesurface.html#window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.simplesurface.window" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an window object if the fsd (fenestrationsurface:detailed) is 
+a window</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eppy.snippet">
+<span id="eppy-snippet-module"></span><h2>eppy.snippet module<a class="headerlink" href="#module-eppy.snippet" title="Permalink to this headline">¶</a></h2>
+<p>just a snippet that is used in tests</p>
+</div>
+<div class="section" id="module-eppy.walk_hvac">
+<span id="eppy-walk-hvac-module"></span><h2>eppy.walk_hvac module<a class="headerlink" href="#module-eppy.walk_hvac" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="eppy.walk_hvac.main">
+<code class="descclassname">eppy.walk_hvac.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/walk_hvac.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.walk_hvac.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="eppy.walk_hvac.nextnode">
+<code class="descclassname">eppy.walk_hvac.</code><code class="descname">nextnode</code><span class="sig-paren">(</span><em>edges</em>, <em>component</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/walk_hvac.html#nextnode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.walk_hvac.nextnode" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the next component in the loop</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="eppy.walk_hvac.prevnode">
+<code class="descclassname">eppy.walk_hvac.</code><code class="descname">prevnode</code><span class="sig-paren">(</span><em>edges</em>, <em>component</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eppy/walk_hvac.html#prevnode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#eppy.walk_hvac.prevnode" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the pervious component in the loop</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-eppy">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eppy" title="Permalink to this headline">¶</a></h2>
+<p>Top-level package for eppy.</p>
 </div>
 </div>
 
@@ -48,7 +956,29 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">eppy package</a><ul>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-eppy.bunch_subclass">eppy.bunch_subclass module</a></li>
+<li><a class="reference internal" href="#module-eppy.bunchhelpers">eppy.bunchhelpers module</a></li>
+<li><a class="reference internal" href="#eppy-easyopen-module">eppy.easyopen module</a></li>
+<li><a class="reference internal" href="#module-eppy.ex_inits">eppy.ex_inits module</a></li>
+<li><a class="reference internal" href="#module-eppy.fanpower">eppy.fanpower module</a></li>
+<li><a class="reference internal" href="#module-eppy.function_helpers">eppy.function_helpers module</a></li>
+<li><a class="reference internal" href="#eppy-hvacbuilder-module">eppy.hvacbuilder module</a></li>
+<li><a class="reference internal" href="#eppy-iddcurrent-module">eppy.iddcurrent module</a></li>
+<li><a class="reference internal" href="#module-eppy.iddgaps">eppy.iddgaps module</a></li>
+<li><a class="reference internal" href="#eppy-idf-helpers-module">eppy.idf_helpers module</a></li>
+<li><a class="reference internal" href="#module-eppy.idf_msequence">eppy.idf_msequence module</a></li>
+<li><a class="reference internal" href="#module-eppy.idfreader">eppy.idfreader module</a></li>
+<li><a class="reference internal" href="#module-eppy.json_functions">eppy.json_functions module</a></li>
+<li><a class="reference internal" href="#module-eppy.loops">eppy.loops module</a></li>
+<li><a class="reference internal" href="#eppy-modeleditor-module">eppy.modeleditor module</a></li>
+<li><a class="reference internal" href="#module-eppy.pytest_helpers">eppy.pytest_helpers module</a></li>
+<li><a class="reference internal" href="#eppy-simpleread-module">eppy.simpleread module</a></li>
+<li><a class="reference internal" href="#module-eppy.simplesurface">eppy.simplesurface module</a></li>
+<li><a class="reference internal" href="#module-eppy.snippet">eppy.snippet module</a></li>
+<li><a class="reference internal" href="#module-eppy.walk_hvac">eppy.walk_hvac module</a></li>
+<li><a class="reference internal" href="#module-eppy">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -87,7 +1017,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/eppy.rst.txt"
