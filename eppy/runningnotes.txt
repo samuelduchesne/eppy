@@ -9,8 +9,12 @@ copied from cookiecutter generated eppp:
 - docs/Makefile
 - docs/conf.py
 - moved files form docs/source to docs/
-- removed iddv*.py files
-    - or rename them as _iddv*.py
+- rename them as _iddv*.py
+
+It works, but we have to check all the errors that `make docs` is throwing up
+
+Alternate strategy is to make `make docs` use source/*.rst
+or just abandon `make docs` - change make help to reflect this and disable `make docs`
 
 2018-10-03
 ----------
