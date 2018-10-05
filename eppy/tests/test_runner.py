@@ -16,6 +16,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import contextlib
 from glob import glob
 import multiprocessing
 import os
@@ -247,6 +248,11 @@ class TestIDFRunner(object):
         shutil.rmtree('run_outputs', ignore_errors=True)
         shutil.rmtree('other_run_outputs', ignore_errors=True)
         shutil.rmtree("test_results", ignore_errors=True)
+        for f in {"eplusout.end", "eplusout.err", "in.idf"}:
+            try:
+                os.remove(os.path.join(THIS_DIR, f))
+            except OSError:  # file was not generated on this run
+                pass
 
     def num_rows_in_csv(self, results='./run_outputs'):
         """Check readvars outputs the expected number of rows.
@@ -567,6 +573,31 @@ class TestMultiprocessing(object):
             runs.append([modeleditor.IDF(open(fname1, 'r'), TEST_EPW),
                          {'output_directory': 'results_%i' % i,
                           'ep_version': ep_version}])
+        num_CPUs = 2
+        runIDFs(runs, num_CPUs)
+
+        num_CPUs = -1
+        runIDFs(runs, num_CPUs)
+
+    def test_multiprocess_run_IDF_from_generator(self):
+        """
+        Test that we can run a sequence passed as a generator of runs using
+        the signature:
+            runIDFs(([IDF, kwargs],...), num_CPUs)
+        Fails if expected output files are not in the expected output
+        directories.
+
+        """
+        iddfile = os.path.join(IDD_FILES, TEST_IDD)
+        fname1 = os.path.join(IDF_FILES, TEST_IDF)
+        modeleditor.IDF.setiddname(open(iddfile, 'r'), testing=True)
+        ep_version = '-'.join(str(x) for x in modeleditor.IDF.idd_version[:3])
+        assert ep_version == VERSION
+        runs = (
+            (modeleditor.IDF(open(fname1, 'r'), TEST_EPW),
+             {'output_directory': 'results_%i' % i, 'ep_version': ep_version})
+            for i in range(4)
+        )
         num_CPUs = 2
         runIDFs(runs, num_CPUs)
 

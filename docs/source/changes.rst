@@ -1,9 +1,13 @@
 Changes
 =======
 
+release r0.5.48
+~~~~~~~~~~~~~~~
+
 2018-10-03
 ----------
 
+- using cookiecuter <https://github.com/audreyr/cookiecutter-pypackage> in eppy
 - fixed bug in idf.run()
     - the bug resulted in the working directory changing if the run was done with an invalid idf
 
