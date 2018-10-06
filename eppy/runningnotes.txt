@@ -1,5 +1,18 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2018-10-06
+----------
+
+JSON:
+
+- Just do the Building object.
+- Make an IDD with just the Building object  
+    - DONE in eppy/resources/snippets/V8_9
+    - using onlyoneobject.ipynb
+- generate json IDF (So you have a working building object.)
+    - DONE
+
+
 2018-10-05
 ----------
 
