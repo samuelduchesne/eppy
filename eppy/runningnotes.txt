@@ -1,5 +1,21 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2018-10-05
+----------
+
+JSON:
+
+- Explore a simple object like "Building" - both epJSON and iddJSON
+- Then start to explore the other known objects
+    - look for the ones that are tricky in the idd parser (extra coding needed in eppy)
+    
+- lot of new keyword
+    - idd has a lot of documentation - standalone document self descriptive
+
+- use to read json
+    - http://jsoneditoronline.org/#/
+
+
 2018-10-03
 ----------
 
