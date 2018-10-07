@@ -1,5 +1,10 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2018-10-07
+----------
+
+update munch
+
 2018-10-06
 ----------
 
