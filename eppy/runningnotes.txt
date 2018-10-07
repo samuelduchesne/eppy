@@ -5,6 +5,8 @@ rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line
 
 update munch
 
+readidfJSON.ipynb uses munch ro read idf.epJSON
+
 2018-10-06
 ----------
 
