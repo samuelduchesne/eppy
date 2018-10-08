@@ -1,5 +1,37 @@
 rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line at top
 
+2018-10-08
+----------
+
+notes on eppy3000 idd
+~~~~~~~~~~~~~~~~~~~~~
+
+- the idd in epJSON in very large (9 meg ?)
+- don't want to kep in memory
+- Options:
+    - DB option
+        - stre it in Mongodb (json is a good fit for mongodb)
+        - cache it using Redis
+    - non-DB option 1.
+        - save each idd object into a separate file
+        - read the file when needed
+            - cache the read file in a revolving list (list of fixed size - like Redis)
+    - non-DB option 2.
+        - develop a read only DB with seek/find index for objects in it
+
+eppy3000 idf
+~~~~~~~~~~~~
+
+- adding functions to objects (like area, azimuth, vertices etc for surfaces)
+    - add it later as a key value <function_name:function> as a field for the object
+        - store these as a separate JSON
+- Have objects not in the idd in a separate JSON
+    these serve as the seed for meta_eppy
+    
+            
+
+
+
 2018-10-07
 ----------
 
