@@ -5,7 +5,16 @@ rsync -av --exclude=".*" eplusinterface_diagrams/ ./eppy_0_4_0 # leave this line
 
 update munch
 
-readidfJSON.ipynb uses munch ro read idf.epJSON
+readidfJSON.ipynb uses munch to read idf.epJSON
+
+Options:
+- develop eppy3000 as stand alone
+    - use this to understand the implications of epJSON.
+- let eppy be able to read epJSON
+    - allow translation to eppy format 
+        - this can be positional or non-positional
+- allow users to weigh in on the direction
+    - this interaction has to be carefully setup and curated.
 
 2018-10-06
 ----------
