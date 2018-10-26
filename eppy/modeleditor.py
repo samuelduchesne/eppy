@@ -551,6 +551,12 @@ class IDF(object):
         if epw != None:
             self.epw = epw
         self.outputtype = "standard"
+    
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        pass
 
     """ Methods to set up the IDD."""
     @classmethod
